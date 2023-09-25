@@ -81,6 +81,8 @@ void Error_Handler(void);
 #define SRCLK_GPIO_Port GPIOA
 #define SER_Pin GPIO_PIN_9
 #define SER_GPIO_Port GPIOA
+#define BUZZER_Pin GPIO_PIN_3
+#define BUZZER_GPIO_Port GPIOB
 #define RCLK_Pin GPIO_PIN_5
 #define RCLK_GPIO_Port GPIOB
 #define D4_Pin GPIO_PIN_6
