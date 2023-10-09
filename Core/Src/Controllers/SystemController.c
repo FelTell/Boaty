@@ -18,7 +18,7 @@ void SystemController_Run(void) {}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     switch (GPIO_Pin) {
         case B1_Pin: {
-            PowerControlDriver_SetPower(value += 10);
+            PowerControlDriver_SetPower(value += 10, false);
             if (value > 100) {
                 value = 0;
             }
