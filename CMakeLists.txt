@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
-set(PROJECT_NAME Aula8ProgEmb)
+set(PROJECT_NAME Boaty)
 set(EXE_NAME ${PROJECT_NAME}.elf)
 set(OPENOCD_CFG_NAME ${PROJECT_NAME}.cfg)
 
@@ -29,7 +29,7 @@ endif()
 add_library(ST STATIC)
 
 FILE(GLOB_RECURSE HAL_DRIVERS_SOURCES
-    Drivers/*/*.c
+    Drivers/*.c
 )
 
 # Add HAL sources files
@@ -119,7 +119,7 @@ target_link_options(${EXE_NAME} PRIVATE
 
 target_compile_definitions(${EXE_NAME} PUBLIC
     USE_HAL_DRIVER
-    STM32H743xx
+    STM32F446xx
 )
 
 target_link_libraries(${EXE_NAME} PRIVATE
