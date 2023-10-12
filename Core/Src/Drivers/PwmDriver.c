@@ -1,10 +1,9 @@
 #include "Drivers/PwmDriver.h"
 
-#include <stdbool.h>
-
 #include "Utils.h"
-
 #include "main.h"
+
+#include <stdbool.h>
 
 #define ARR_MAX_VALUE 999
 #define ARR_MIN_VALUE 0

@@ -1,9 +1,9 @@
 #include "Drivers/PowerControlDriver.h"
 
-#include <Utils.h>
-
 #include "Drivers/PwmDriver.h"
 #include "Drivers/ShiftRegisterDriver.h"
+
+#include <Utils.h>
 
 static void UpdateDirection();
 

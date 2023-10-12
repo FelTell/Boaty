@@ -2,7 +2,6 @@
 
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
-
 #include "main.h"
 
 #define DELAY_MS 1000
