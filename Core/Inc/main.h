@@ -64,10 +64,10 @@ void Error_Handler(void);
 #define B1_EXTI_IRQn EXTI15_10_IRQn
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
-#define PowerPwm_Pin GPIO_PIN_6
+#define PowerPwm_Pin GPIO_PIN_7
 #define PowerPwm_GPIO_Port GPIOA
-#define RudderPwm_Pin GPIO_PIN_7
-#define RudderPwm_GPIO_Port GPIOC
+#define RudderPwm_Pin GPIO_PIN_6
+#define RudderPwm_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

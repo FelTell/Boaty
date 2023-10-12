@@ -1,8 +1,8 @@
-#include "Services/PowerControlDriver.h"
+#include "Drivers/PowerControlDriver.h"
 
 #include <Utils.h>
 
-#include "Services/Pwm3Driver.h"
+#include "Drivers/PwmDriver.h"
 
 static void SetDirection(bool isBackwards);
 
@@ -12,7 +12,7 @@ void PowerControlDriver_Init(void) {
     if (initDone) {
         return;
     }
-    Pwm3Driver_Init();
+    PwmDriver_Init();
 
     initDone = true;
 }
@@ -26,8 +26,7 @@ void PowerControlDriver_SetPower(int32_t percentage,
     UTILS_CLAMP(percentage, 0, 100);
 
     SetDirection(isBackwards);
-    Pwm3Driver_SetValue(PWM3_CHANNEL_POWER,
-                        percentage * 10);
+    PwmDriver_SetValue(PWM_OUTPUT_POWER, percentage * 10);
 }
 
 static void SetDirection(bool isBackwards) {

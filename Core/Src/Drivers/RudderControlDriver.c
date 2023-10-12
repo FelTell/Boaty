@@ -1,9 +1,9 @@
-#include "Services/RudderControlDriver.h"
+#include "Drivers/RudderControlDriver.h"
 
 #include <Utils.h>
 #include <stdbool.h>
 
-#include "Services/Pwm3Driver.h"
+#include "Drivers/PwmDriver.h"
 
 #define MAX_ANGLE 90
 #define MIN_ANGLE (-90)
@@ -25,7 +25,7 @@ void RudderControlDriver_Init(void) {
     if (initDone) {
         return;
     }
-    Pwm3Driver_Init();
+    PwmDriver_Init();
 
     RudderControlDriver_SetAngle(0);
 
@@ -41,5 +41,5 @@ void RudderControlDriver_SetAngle(int32_t angle) {
 
     const int32_t pwmValue = ANGLE_TO_PWM(angle);
 
-    Pwm3Driver_SetValue(PWM3_CHANNEL_RUDDER, pwmValue);
+    PwmDriver_SetValue(PWM_OUTPUT_RUDDER, pwmValue);
 }
