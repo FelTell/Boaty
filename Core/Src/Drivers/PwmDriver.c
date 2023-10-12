@@ -9,11 +9,6 @@
 #define ARR_MAX_VALUE 999
 #define ARR_MIN_VALUE 0
 
-#define POWER_PWM_HANDLE   htim3
-#define POWER_PWM_CHANNEL  TIM_CHANNEL_2
-#define RUDDER_PWM_HANDLE  htim4
-#define RUDDER_PWM_CHANNEL TIM_CHANNEL_1
-
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 
