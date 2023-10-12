@@ -16,6 +16,8 @@
 #define ANGLE_TO_PWM_SLOPE                        \
     ((float)((NEUTRAL_PWM_VALUE)-MIN_PWM_VALUE) / \
      (float)MAX_ANGLE)
+#define ANGLE_TO_PWM(x) \
+    ((float)x * ANGLE_TO_PWM_SLOPE + ANGLE_TO_PWM_INTERCEPT)
 
 static bool initDone;
 
@@ -37,9 +39,7 @@ void RudderControlDriver_SetAngle(int32_t angle) {
 
     UTILS_CLAMP(angle, MIN_ANGLE, MAX_ANGLE);
 
-    const int32_t pwmValue =
-        (int32_t)((float)angle * ANGLE_TO_PWM_SLOPE +
-                  ANGLE_TO_PWM_INTERCEPT);
+    const int32_t pwmValue = ANGLE_TO_PWM(angle);
 
     Pwm3Driver_SetValue(PWM3_CHANNEL_RUDDER, pwmValue);
 }
