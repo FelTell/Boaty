@@ -3,8 +3,6 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 set(PROJECT_NAME Boaty)
@@ -14,7 +12,7 @@ set(OPENOCD_CFG_NAME ${PROJECT_NAME}.cfg)
 # CMAKE project name, languages and version
 project(${PROJECT_NAME}
     # C and assembly
-    LANGUAGES C CXX ASM
+    LANGUAGES C ASM
     VERSION 1.0
 )
 
@@ -29,7 +27,7 @@ endif()
 add_library(ST STATIC)
 
 FILE(GLOB_RECURSE HAL_DRIVERS_SOURCES
-    Drivers/*.c
+    Drivers/*/*.c
 )
 
 # Add HAL sources files
