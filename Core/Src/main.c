@@ -49,6 +49,7 @@ TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 int16_t x, y, z;
+int16_t x_, y_, z_;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,9 +110,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       //SystemController_Run();
-	  x = HMC5883L_getHeadingX();
-    y = HMC5883L_getHeadingY();
-    z = HMC5883L_getHeadingZ();
+	  HMC5883L_getHeading(x, y, z);
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  HAL_Delay(50);
   }
