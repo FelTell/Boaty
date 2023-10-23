@@ -99,7 +99,7 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   SystemController_Init();
-  HMC5883L_Init(&hi2c1);
+  HMC5883L_initialize();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,7 +109,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       //SystemController_Run();
-	  HMC5883L_ReadData(&hi2c1, &x, &y, &z);
+	  x = HMC5883L_getHeadingX();
+    y = HMC5883L_getHeadingY();
+    z = HMC5883L_getHeadingZ();
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  HAL_Delay(50);
   }
