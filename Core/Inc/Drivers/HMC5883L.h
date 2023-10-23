@@ -101,6 +101,15 @@ THE SOFTWARE.
 #define HMC5883L_STATUS_LOCK_BIT    1
 #define HMC5883L_STATUS_READY_BIT   0
 
+typedef struct HMC5883L_data
+{
+    /* data */
+    int16_t x_axis,
+    int16_t y_axis,
+    int16_t z_axis;
+}measure_t;
+
+
 void HMC5883L_initialize();
 bool HMC5883L_testConnection();
 
@@ -125,5 +134,9 @@ void HMC5883L_getHeading(int16_t *x, int16_t *y, int16_t *z);
 int16_t HMC5883L_getHeadingX();
 int16_t HMC5883L_getHeadingY();
 int16_t HMC5883L_getHeadingZ();
+
+// Calibration 
+int16_t calibration(int16_t x_, int16_t y_, int16_t z_, int16_t x, int16_t, )
+void self_test_operation();
 
 #endif /* _HMC5883L_H_ */
