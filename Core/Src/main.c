@@ -101,7 +101,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   SystemController_Init();
   HMC5883L_initialize();
-  HMC_offset = calibration(); 
+  HMC_offset = HMC5883L_calibration(); 
   /* USER CODE END 2 */
 
   /* Infinite loop */

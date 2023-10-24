@@ -136,7 +136,7 @@ int16_t HMC5883L_getHeadingY();
 int16_t HMC5883L_getHeadingZ();
 
 // Calibration 
-calibration_offset_t calibration();
+calibration_offset_t HMC5883L_calibration();
 
 //Self test operations
 void _positive_self_test();

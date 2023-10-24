@@ -304,7 +304,7 @@ int16_t HMC5883L_getHeadingZ() {
 }
 
 //function that returns the offset by comparing HMC5883 data in a default state and a cellphone aproximation
-calibration_offset_t calibration() {
+calibration_offset_t HMC5883L_calibration() {
     int16_t x_cellphone, y_cellphone, z_cellphone;
     int16_t x_default, y_default, z_default;
     calibration_offset_t offsets;
