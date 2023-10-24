@@ -37,7 +37,7 @@ THE SOFTWARE.
 * https://github.com/jrowberg/i2cdevlib/tree/master
 */
 
-#include "HMC5883L.h"
+#include "Drivers/HMC5883L.h"
 
 static uint8_t devAddr;
 static uint8_t buffer[6];
