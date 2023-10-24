@@ -111,7 +111,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       //SystemController_Run();
-	  HMC5883L_getHeading(x - HMC_offset.x_axis, y - HMC_offset.y_axis, z HMC_offset.z_axis);
+	  HMC5883L_getHeading(&x, &y, &z);
+	  //actual HMC5883L value
+	  x = x - HMC_offset.x_axis;
+	  y = y - HMC_offset.y_axis;
+	  z = z - HMC_offset.z_axis;
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  HAL_Delay(50);
   }
