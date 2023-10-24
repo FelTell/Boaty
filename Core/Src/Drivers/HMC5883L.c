@@ -303,3 +303,54 @@ int16_t HMC5883L_getHeadingZ() {
     return (((int16_t)buffer[2]) << 8) | buffer[3];
 }
 
+//function that returns the offset by comparing HMC5883 data in a default state and a cellphone aproximation
+calibration_offset_t calibration() {
+    int16_t x_cellphone, y_cellphone, z_cellphone;
+    int16_t x_default, y_default, z_default;
+    calibration_offset_t offsets;
+
+    // Get default readings from your HMC5883L sensor
+    HMC5883L_getHeading(&x_default, &y_default, &z_default);
+
+    // Delay to allow time for the cellphone magnetometer to stabilize
+    HAL_Delay(10000); // Adjust the delay as needed
+
+    // Get readings from the cellphone magnetometer
+    HMC5883L_getHeading(&x_cellphone, &y_cellphone, &z_cellphone);
+
+    // Calculate offsets
+    offsets.x_axis = x_default - x_cellphone;
+    offsets.y_axis = y_default - y_cellphone;
+    offsets.z_axis = z_default - z_cellphone;
+
+    return offsets;
+}
+
+    // 1.  Write CRA (00) – send 0x3C 0x00 0x71 (8-average, 15 Hz default, positive self test measurement) 
+	// 2.  Write CRB (01) – send 0x3C 0x01 0xA0 (Gain=5) 
+	// 3.  Write Mode (02) – send 0x3C 0x02 0x00 (Continuous-measurement mode) 
+	// 4.  Wait 6 ms or monitor status register or DRDY hardware interrupt pin 
+	// 5. Loop 
+	// Send 0x3D 0x06 (Read all 6 bytes. If gain is changed then this data set is using previous gain) 
+	// Convert three 16-bit 2’s compliment hex values to decimal values and assign to X, Z, Y, respectively. 
+	// Send 0x3C 0x03 (point to first data register 03) 
+	// Wait about 67 ms (if 15 Hz rate) or monitor status register or DRDY hardware interrupt pin End_loop 6.  
+	// Check limits – 
+	// If all 3 axes (X, Y, and Z) are within reasonable limits (243 to 575 for Gain=5, adjust these limits 
+	// basing on the gain setting used. See an example below.) 
+	// Then   All 3 axes pass positive self test   
+	// Write CRA (00) – send 0x3C 0x00 0x70 (Exit self test mode and this procedure) 
+	// Else   If Gain<7 Write CRB (01) – send 0x3C 0x01 0x_0 (Increase gain setting and retry, skip the next data set) 
+	// Else  At least one axis did not pass positive self test 
+	// Write CRA (00) – send 0x3C 0x00 0x70 (Exit self test mode and this procedure) 
+	// End If  Below is an example of how to adjust the “positive self” test limits basing on the gain setting: 
+	// 1.  If Gain = 6, self test limits are:  
+	// Low Limit = 243 * 330/390 = 206 
+	// High Limit = 575 * 330/390 = 487  
+	// 2.  If Gain = 7, self test limits are:  
+	// Low Limit = 243 * 230/390 = 143 
+	// High Limit = 575 * 230/390 = 339
+void self_test_operation() {
+
+}
+
