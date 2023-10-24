@@ -49,7 +49,7 @@ TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 int16_t x, y, z;
-int16_t x_, y_, z_;
+calibration_offset_t HMC_offset;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,6 +101,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   SystemController_Init();
   HMC5883L_initialize();
+  HMC_offset = calibration(); 
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,7 +111,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       //SystemController_Run();
-	  HMC5883L_getHeading(x, y, z);
+	  HMC5883L_getHeading(x - HMC_offset.x_axis, y - HMC_offset.y_axis, z HMC_offset.z_axis);
 	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	  HAL_Delay(50);
   }
