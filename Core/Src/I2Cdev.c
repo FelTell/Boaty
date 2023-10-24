@@ -30,7 +30,7 @@ THE SOFTWARE.
 ===============================================
 */
 
-#include "I2Cdev.h"
+#include "Drivers/I2Cdev.h"
 
 // Hold pointer to inited HAL I2C device
 static I2C_HandleTypeDef * I2Cdev_hi2c;
