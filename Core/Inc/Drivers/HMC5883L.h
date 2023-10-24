@@ -37,6 +37,7 @@ THE SOFTWARE.
 #define _HMC5883L_H_
 
 #include "I2Cdev.h"
+#include "main.h"
 
 #define HMC5883L_ADDRESS            0x1E // this device only has one address
 #define HMC5883L_DEFAULT_ADDRESS    0x1E
@@ -103,11 +104,10 @@ THE SOFTWARE.
 
 typedef struct HMC5883L_data
 {
-    /* data */
-    int16_t x_axis,
-    int16_t y_axis,
+    int16_t x_axis;
+    int16_t y_axis;
     int16_t z_axis;
-}measure_t;
+} calibration_offset_t;
 
 
 void HMC5883L_initialize();
@@ -136,7 +136,9 @@ int16_t HMC5883L_getHeadingY();
 int16_t HMC5883L_getHeadingZ();
 
 // Calibration 
-int16_t calibration(int16_t x_, int16_t y_, int16_t z_, int16_t x, int16_t, )
-void self_test_operation();
+calibration_offset_t calibration();
+
+//Self test operations
+void _positive_self_test();
 
 #endif /* _HMC5883L_H_ */
