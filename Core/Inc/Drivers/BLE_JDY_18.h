@@ -8,14 +8,14 @@
 #define MEDIA_MOVEL_JANELA 10
 
 typedef enum {
-	SLAVE = 0,
-	MASTER = 1,
-	IBEACON = 3
+    SLAVE,
+    MASTER,
+    IBEACON,
 } Funcao_t;
 
 // JDY-18 comandos AT
 typedef enum {
-	AT_COMMAND_SET_PERMISSIONS,
+    AT_COMMAND_SET_PERMISSIONS,
     AT_COMMAND_RESET,
     AT_COMMAND_DEFINIR_NOME,
     AT_COMMAND_DEFINIR_FUNCAO,
@@ -29,17 +29,17 @@ typedef enum {
 
 
 typedef struct {
-    char mac_address[18]; // Endereço MAC do escravo (por exemplo, "00:11:22:33:44:55")
-	int signal_rssi;
+    char mac_address[18];
+    int signal_rssi;
 } SlaveDevice_t;
 
 typedef enum {
-	BAUD_4800 = 3,
-	BAUD_9600 = 4,
-	BAUD_19200 = 5,
-	BAUD_38400 = 6,
-	BAUD_57600 = 7,
-	BAUD_115200 = 8,
+    BAUD_4800,
+    BAUD_9600,
+    BAUD_19200,
+    BAUD_38400,
+    BAUD_57600,
+    BAUD_115200,
 } Baudrate_t;
 
 typedef struct {

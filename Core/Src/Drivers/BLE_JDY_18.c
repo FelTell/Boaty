@@ -4,25 +4,25 @@ UART_HandleTypeDef *huart;
 
 // Prefixos comandos AT
 const char *at_commands[] = {
-	"AT+PERM",
+    "AT+PERM",
     "AT+RESET",
     "AT+NAME=",
     "AT+ROLE=",
     "AT+BAUD=",
     "AT+UUID=",
     "AT+POWER=",
-	"AT+INQ",
-	"AT+CONN",
+    "AT+INQ",
+    "AT+CONN",
     // Add mais prefixos
 };
 
 
-// Função para configurar o JDY-18 com várias configurações iniciais
+// Função para configurar o JDY-18 com configurações iniciais
 void BLE_setup(UART_HandleTypeDef *huartInt, char *nome, Funcao_t funcao, Baudrate_t baud, char *uuid, int power_pctg) {
 	huart = huartInt;
 
 	//APP permission Settings, todos habilitados
-	BLE_send_command(AT_COMMAND_SET_PERMISSIONS, "11111");
+    BLE_send_command(AT_COMMAND_SET_PERMISSIONS, "11111");
 
 	// Define o nome do dispositivo
     BLE_send_command(AT_COMMAND_DEFINIR_NOME, nome);
