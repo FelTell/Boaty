@@ -52,7 +52,7 @@ static uint8_t mode;
  * after initialization, especially the gain settings if you happen to be seeing
  * a lot of -4096 values (see the datasheet for mor information).
  */
-void HMC5883L_initialize() {
+void HMC5883LDriver_Init() {
     devAddr = HMC5883L_DEFAULT_ADDRESS;
     // write CONFIG_A register
     I2Cdev_writeByte(devAddr, HMC5883L_RA_CONFIG_A,
@@ -262,7 +262,7 @@ void HMC5883L_setMode(uint8_t newMode) {
  * @param z 16-bit signed integer container for Z-axis heading
  * @see HMC5883L_RA_DATAX_H
  */
-void HMC5883L_getHeading(int16_t *x, int16_t *y, int16_t *z) {
+void HMC5883LDriver_GetHeading(int16_t *x, int16_t *y, int16_t *z) {
     I2Cdev_readBytes(devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
     if (mode == HMC5883L_MODE_SINGLE) I2Cdev_writeByte(devAddr, HMC5883L_RA_MODE, HMC5883L_MODE_SINGLE << (HMC5883L_MODEREG_BIT - HMC5883L_MODEREG_LENGTH + 1));
     *x = (((int16_t)buffer[0]) << 8) | buffer[1];
@@ -304,19 +304,19 @@ int16_t HMC5883L_getHeadingZ() {
 }
 
 //function that returns the offset by comparing HMC5883 data in a default state and a cellphone aproximation
-calibration_offset_t HMC5883L_calibration() {
+calibration_offset_t HMC5883LDriver_Calibration() {
     int16_t x_cellphone, y_cellphone, z_cellphone;
     int16_t x_default, y_default, z_default;
     calibration_offset_t offsets;
 
     // Get default readings from your HMC5883L sensor
-    HMC5883L_getHeading(&x_default, &y_default, &z_default);
+    HMC5883LDriver_GetHeading(&x_default, &y_default, &z_default);
 
     // Delay to allow time for the cellphone magnetometer to stabilize
     HAL_Delay(10000); // Adjust the delay as needed
 
     // Get readings from the cellphone magnetometer
-    HMC5883L_getHeading(&x_cellphone, &y_cellphone, &z_cellphone);
+    HMC5883LDriver_GetHeading(&x_cellphone, &y_cellphone, &z_cellphone);
 
     // Calculate offsets
     offsets.x_axis = x_default - x_cellphone;

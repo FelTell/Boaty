@@ -110,7 +110,7 @@ typedef struct HMC5883L_data
 } calibration_offset_t;
 
 
-void HMC5883L_initialize();
+void HMC5883LDriver_Init();
 bool HMC5883L_testConnection();
 
 // CONFIG_A register
@@ -130,13 +130,13 @@ uint8_t HMC5883L_getMode();
 void HMC5883L_setMode(uint8_t mode);
 
 // DATA* registers
-void HMC5883L_getHeading(int16_t *x, int16_t *y, int16_t *z);
+void HMC5883LDriver_GetHeading(int16_t *x, int16_t *y, int16_t *z);
 int16_t HMC5883L_getHeadingX();
 int16_t HMC5883L_getHeadingY();
 int16_t HMC5883L_getHeadingZ();
 
 // Calibration 
-calibration_offset_t HMC5883L_calibration();
+calibration_offset_t HMC5883LDriver_Calibration();
 
 //Self test operations
 void _positive_self_test();

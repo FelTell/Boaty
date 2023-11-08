@@ -23,7 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Controllers/SystemController.h"
-#include "Drivers/HMC5883L.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,12 +49,6 @@ TIM_HandleTypeDef htim4;
 UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
-
-I2C_HandleTypeDef hi2c1;
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
-int16_t x, y, z;
-calibration_offset_t HMC_offset;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -108,11 +101,6 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   SystemController_Init();
-  MX_I2C1_Init();
-  /* USER CODE BEGIN 2 */
-  SystemController_Init();
-  HMC5883L_initialize();
-  HMC_offset = HMC5883L_calibration(); 
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -121,15 +109,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      SystemController_Run();
-      //SystemController_Run();
-	  HMC5883L_getHeading(&x, &y, &z);
-	  //actual HMC5883L value
-	  x = x - HMC_offset.x_axis;
-	  y = y - HMC_offset.y_axis;
-	  z = z - HMC_offset.z_axis;
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(50);
+    SystemController_Run();
+
   }
   /* USER CODE END 3 */
 }
