@@ -38,15 +38,70 @@
 #define TARGET_BEACON_X BEACON_1_X
 #define TARGET_BEACON_Y BEACON_1_Y
 
+/**
+ * @brief Calculates the distance (radius) with the signal
+ * strength of the beacon
+ *
+ * @param signalStrength RSSI value provided by the ble
+ * module
+ * @return float
+ */
 float GetDistanceFromBeacon(float signalStrength);
+
+/**
+ * @brief Trilaterate the position with the distance found
+ * by the ble module. Since the beacons position are fixed
+ * this is configured in a define above.
+ *
+ * @param distanceBeacon1
+ * @param distanceBeacon2
+ * @param distanceBeacon3
+ * @param x
+ * @param y
+ */
 void TrilateratePosition(float distanceBeacon1,
                          float distanceBeacon2,
                          float distanceBeacon3,
                          float* x,
                          float* y);
+
+/**
+ * @brief Get the Angle relative to the north as found by
+ * the compass module
+ *
+ * @return float in degrees
+ */
 float GetAngleFromNorth();
+
+/**
+ * @brief Calculates the desired angle with the boat
+ * position and the target beacon position
+ *
+ * @param x
+ * @param y
+ * @return float
+ */
 float GetDesiredAngle(float x, float y);
+
+/**
+ * @brief Calculates the right power to send to the motor as
+ * defined by the error of the angle. A smaller angle means
+ * the motor will go full power to the target
+ *
+ * @param detected
+ * @param desired
+ * @return uint8_t
+ */
 uint8_t GetPowerPercentage(float detected, float desired);
+
+/**
+ * @brief Calculates the right rudder angle to reach the
+ * target
+ *
+ * @param detected
+ * @param desired
+ * @return float
+ */
 float GetRudderAngle(float detected, float desired);
 
 static calibration_offset_t HMC_offset;
