@@ -35,6 +35,7 @@ THE SOFTWARE.
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 // TODO: include depending on chip family
@@ -43,9 +44,6 @@ THE SOFTWARE.
 //#include "stm32f3xx_hal.h"
 #include "stm32f4xx_hal.h"
 
-typedef int bool;
-#define true 1
-#define false 0
 
 //uint16_t I2Cdev_readTimeout;
 
