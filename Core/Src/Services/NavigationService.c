@@ -16,11 +16,12 @@
 #include "Drivers/HMC5883L.h"
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
+#include "global_instances.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define RAD_TO_DEGREES(x) (((x)*180) / M_PI)
+#define RAD_TO_DEGREES(x) (((x) * 180) / M_PI)
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
@@ -115,27 +116,35 @@ void NavigationService_Init() {
 }
 
 void NavigationService_Handler() {
-    SlaveDevice_t slaves[3];
-    BLE_scan_slaves_and_save(slaves, 3);
+    static bleMessage_t bleMessage;
+    static float currentX;
+    static float currentY;
 
-    float currentX;
-    float currentY;
+    for (;;) {
+        osMessageQueueGet(q_bleMessageHandle,
+                          &bleMessage,
+                          0,
+                          osWaitForever);
 
-    TrilateratePosition(
-        GetDistanceFromBeacon(slaves[1].signal_rssi),
-        GetDistanceFromBeacon(slaves[2].signal_rssi),
-        GetDistanceFromBeacon(slaves[3].signal_rssi),
-        &currentX,
-        &currentY);
+        TrilateratePosition(
+            GetDistanceFromBeacon(
+                bleMessage.slaves[1].signal_rssi),
+            GetDistanceFromBeacon(
+                bleMessage.slaves[2].signal_rssi),
+            GetDistanceFromBeacon(
+                bleMessage.slaves[3].signal_rssi),
+            &currentX,
+            &currentY);
 
-    float desiredAngle =
-        GetDesiredAngle(currentX, currentY);
-    float detectedAngle = GetAngleFromNorth();
-    PowerControlDriver_SetPower(
-        GetPowerPercentage(detectedAngle, desiredAngle),
-        false);
-    RudderControlDriver_SetAngle(
-        GetRudderAngle(detectedAngle, desiredAngle));
+        float desiredAngle =
+            GetDesiredAngle(currentX, currentY);
+        float detectedAngle = GetAngleFromNorth();
+        PowerControlDriver_SetPower(
+            GetPowerPercentage(detectedAngle, desiredAngle),
+            false);
+        RudderControlDriver_SetAngle(
+            GetRudderAngle(detectedAngle, desiredAngle));
+    }
 }
 
 float GetDistanceFromBeacon(float signalStrength) {

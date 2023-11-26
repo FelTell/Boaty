@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Controllers/SystemController.h"
+#include "global_instances.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,12 +50,60 @@ TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart3;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for navigationTask */
+osThreadId_t navigationTaskHandle;
+const osThreadAttr_t navigationTask_attributes = {
+  .name = "navigationTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh7,
+};
+/* Definitions for powerMotorTask */
+osThreadId_t powerMotorTaskHandle;
+const osThreadAttr_t powerMotorTask_attributes = {
+  .name = "powerMotorTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for rudderMotorTask */
+osThreadId_t rudderMotorTaskHandle;
+const osThreadAttr_t rudderMotorTask_attributes = {
+  .name = "rudderMotorTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow1,
+};
+/* Definitions for bleTask */
+osThreadId_t bleTaskHandle;
+const osThreadAttr_t bleTask_attributes = {
+  .name = "bleTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow2,
+};
+/* Definitions for Hmc5883LTask */
+osThreadId_t Hmc5883LTaskHandle;
+const osThreadAttr_t Hmc5883LTask_attributes = {
+  .name = "Hmc5883LTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow3,
+};
+/* Definitions for q_rudderMessage */
+osMessageQueueId_t q_rudderMessageHandle;
+const osMessageQueueAttr_t q_rudderMessage_attributes = {
+  .name = "q_rudderMessage"
+};
+/* Definitions for q_powerMessage */
+osMessageQueueId_t q_powerMessageHandle;
+const osMessageQueueAttr_t q_powerMessage_attributes = {
+  .name = "q_powerMessage"
+};
+/* Definitions for q_bleMessage */
+osMessageQueueId_t q_bleMessageHandle;
+const osMessageQueueAttr_t q_bleMessage_attributes = {
+  .name = "q_bleMessage"
+};
+/* Definitions for q_hmc5883LMessage */
+osMessageQueueId_t q_hmc5883LMessageHandle;
+const osMessageQueueAttr_t q_hmc5883LMessage_attributes = {
+  .name = "q_hmc5883LMessage"
 };
 /* USER CODE BEGIN PV */
 /* USER CODE END PV */
@@ -66,7 +115,11 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART3_UART_Init(void);
-void StartDefaultTask(void *argument);
+void NavigationService_Handler(void *argument);
+extern void PowerControlDriver_Handler(void *argument);
+extern void RudderControlDriver_Handler(void *argument);
+extern void Ble_Handler(void *argument);
+extern void Hmc5883L_Handler(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -128,13 +181,38 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* creation of q_rudderMessage */
+  q_rudderMessageHandle = osMessageQueueNew (1, sizeof(rudderMessage_t), &q_rudderMessage_attributes);
+
+  /* creation of q_powerMessage */
+  q_powerMessageHandle = osMessageQueueNew (1, sizeof(powerMessage_t), &q_powerMessage_attributes);
+
+  /* creation of q_bleMessage */
+  q_bleMessageHandle = osMessageQueueNew (1, sizeof(bleMessage_t), &q_bleMessage_attributes);
+
+  /* creation of q_hmc5883LMessage */
+  q_hmc5883LMessageHandle = osMessageQueueNew (1, sizeof(hmc5883L_t), &q_hmc5883LMessage_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of navigationTask */
+  navigationTaskHandle = osThreadNew(NavigationService_Handler, NULL, &navigationTask_attributes);
+
+  /* creation of powerMotorTask */
+  powerMotorTaskHandle = osThreadNew(PowerControlDriver_Handler, NULL, &powerMotorTask_attributes);
+
+  /* creation of rudderMotorTask */
+  rudderMotorTaskHandle = osThreadNew(RudderControlDriver_Handler, NULL, &rudderMotorTask_attributes);
+
+  /* creation of bleTask */
+  bleTaskHandle = osThreadNew(Ble_Handler, NULL, &bleTask_attributes);
+
+  /* creation of Hmc5883LTask */
+  Hmc5883LTaskHandle = osThreadNew(Hmc5883L_Handler, NULL, &Hmc5883LTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -446,14 +524,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_NavigationService_Handler */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the navigationTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_NavigationService_Handler */
+__weak void NavigationService_Handler(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */

@@ -1,5 +1,7 @@
 #include "Drivers/BLE_JDY_18.h"
 
+#include "global_instances.h"
+
 UART_HandleTypeDef* huart;
 
 // Prefixos comandos AT
@@ -15,6 +17,19 @@ const char* at_commands[] = {
     "AT+CONN",
     // Add mais prefixos
 };
+
+void Ble_Handler() {
+    for (;;) {
+        bleMessage_t message;
+        SlaveDevice_t slaves[3];
+        BLE_scan_slaves_and_save(message.slaves, 3);
+
+        osMessageQueuePutOverwrite(
+            q_bleMessageHandle, &message, 0);
+
+        osDelay(200);
+    }
+}
 
 // Função para configurar o JDY-18 com configurações
 // iniciais
