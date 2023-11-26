@@ -21,7 +21,6 @@ const char* at_commands[] = {
 void Ble_Handler() {
     for (;;) {
         bleMessage_t message;
-        SlaveDevice_t slaves[3];
         BLE_scan_slaves_and_save(message.slaves, 3);
 
         osMessageQueuePutOverwrite(

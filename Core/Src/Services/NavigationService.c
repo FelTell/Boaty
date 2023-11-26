@@ -21,8 +21,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define RAD_TO_DEGREES(x) (((x) * 180) / M_PI)
-
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
 #define BLE_POWER 0
@@ -38,6 +36,8 @@
 
 #define TARGET_BEACON_X BEACON_1_X
 #define TARGET_BEACON_Y BEACON_1_Y
+
+#define RAD_TO_DEGREES(x) (((x) * 180) / M_PI)
 
 /**
  * @brief Calculates the distance (radius) with the signal
@@ -105,24 +105,34 @@ uint8_t GetPowerPercentage(float detected, float desired);
  */
 float GetRudderAngle(float detected, float desired);
 
-static calibration_offset_t HMC_offset;
-
 void NavigationService_Init() {
     PowerControlDriver_Init();
     RudderControlDriver_Init();
-    HMC5883LDriver_Init();
-
-    HMC_offset = HMC5883LDriver_Calibration();
 }
 
 void NavigationService_Handler() {
     static bleMessage_t bleMessage;
+    static hmc5883L_t compassMessage;
+    static powerMessage_t powerMessage;
+    static rudderMessage_t rudderMessage;
     static float currentX;
     static float currentY;
 
     for (;;) {
         osMessageQueueGet(q_bleMessageHandle,
                           &bleMessage,
+                          0,
+                          osWaitForever);
+        osMessageQueueGet(q_hmc5883LMessageHandle,
+                          &compassMessage,
+                          0,
+                          osWaitForever);
+        osMessageQueueGet(q_powerMessageHandle,
+                          &powerMessage,
+                          0,
+                          osWaitForever);
+        osMessageQueueGet(q_rudderMessageHandle,
+                          &rudderMessage,
                           0,
                           osWaitForever);
 
@@ -138,12 +148,13 @@ void NavigationService_Handler() {
 
         float desiredAngle =
             GetDesiredAngle(currentX, currentY);
-        float detectedAngle = GetAngleFromNorth();
         PowerControlDriver_SetPower(
-            GetPowerPercentage(detectedAngle, desiredAngle),
+            GetPowerPercentage(
+                compassMessage.angleFromNorth,
+                desiredAngle),
             false);
-        RudderControlDriver_SetAngle(
-            GetRudderAngle(detectedAngle, desiredAngle));
+        RudderControlDriver_SetAngle(GetRudderAngle(
+            compassMessage.angleFromNorth, desiredAngle));
     }
 }
 
@@ -174,20 +185,6 @@ void TrilateratePosition(float distanceBeacon1,
 
     *x = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1);
     *y = (a1 * c2 - a2 * c1) / (a1 * b2 - a2 * b1);
-}
-
-float GetAngleFromNorth() {
-    int16_t compassX;
-    int16_t compassY;
-    int16_t compassZ;
-    HMC5883LDriver_GetHeading(
-        &compassX, &compassY, &compassZ);
-    // actual HMC5883L value
-    compassX -= HMC_offset.x_axis;
-    compassY -= HMC_offset.y_axis;
-    compassZ -= HMC_offset.z_axis;
-
-    return RAD_TO_DEGREES(atanf(compassX / compassY));
 }
 
 float GetDesiredAngle(float x, float y) {

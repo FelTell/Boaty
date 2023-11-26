@@ -119,7 +119,7 @@ void NavigationService_Handler(void *argument);
 extern void PowerControlDriver_Handler(void *argument);
 extern void RudderControlDriver_Handler(void *argument);
 extern void Ble_Handler(void *argument);
-extern void Hmc5883L_Handler(void *argument);
+extern void HMC5883LDriver_Handler(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -212,7 +212,7 @@ int main(void)
   bleTaskHandle = osThreadNew(Ble_Handler, NULL, &bleTask_attributes);
 
   /* creation of Hmc5883LTask */
-  Hmc5883LTaskHandle = osThreadNew(Hmc5883L_Handler, NULL, &Hmc5883LTask_attributes);
+  Hmc5883LTaskHandle = osThreadNew(HMC5883LDriver_Handler, NULL, &Hmc5883LTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
