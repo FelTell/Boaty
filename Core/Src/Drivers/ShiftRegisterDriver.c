@@ -36,26 +36,26 @@ void ShiftRegisterDriver_UpdateRegisters(
 }
 
 static void SetLatchPin(bool value) {
-    HAL_GPIO_WritePin(DIR_LATCH_GPIO_Port,
-                      DIR_LATCH_Pin,
+    HAL_GPIO_WritePin(L293D_LATCH_GPIO_Port,
+                      L293D_LATCH_Pin,
                       value ? GPIO_PIN_SET
                             : GPIO_PIN_RESET);
 }
 static void SetClockPin(bool value) {
-    HAL_GPIO_WritePin(DIR_CLK_GPIO_Port,
-                      DIR_CLK_Pin,
+    HAL_GPIO_WritePin(L293D_CLK_GPIO_Port,
+                      L293D_CLK_Pin,
                       value ? GPIO_PIN_SET
                             : GPIO_PIN_RESET);
 }
 static void SetDataPin(bool value) {
-    HAL_GPIO_WritePin(DIR_SER_GPIO_Port,
-                      DIR_SER_Pin,
+    HAL_GPIO_WritePin(L293D_SER_GPIO_Port,
+                      L293D_SER_Pin,
                       value ? GPIO_PIN_SET
                             : GPIO_PIN_RESET);
 }
 static void SetDisablePin(bool value) {
-    HAL_GPIO_WritePin(DIR_EN_GPIO_Port,
-                      DIR_EN_Pin,
+    HAL_GPIO_WritePin(L293D_EN_GPIO_Port,
+                      L293D_EN_Pin,
                       value ? GPIO_PIN_SET
                             : GPIO_PIN_RESET);
 }

@@ -64,18 +64,18 @@ void Error_Handler(void);
 #define B1_EXTI_IRQn EXTI15_10_IRQn
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
-#define DIR_LATCH_Pin GPIO_PIN_6
-#define DIR_LATCH_GPIO_Port GPIOA
-#define PWM2A_Pin GPIO_PIN_7
-#define PWM2A_GPIO_Port GPIOA
-#define DIR_EN_Pin GPIO_PIN_8
-#define DIR_EN_GPIO_Port GPIOA
-#define DIR_SER_Pin GPIO_PIN_9
-#define DIR_SER_GPIO_Port GPIOA
-#define DIR_CLK_Pin GPIO_PIN_5
-#define DIR_CLK_GPIO_Port GPIOB
-#define PWM1B_Pin GPIO_PIN_6
-#define PWM1B_GPIO_Port GPIOB
+#define L293D_LATCH_Pin GPIO_PIN_6
+#define L293D_LATCH_GPIO_Port GPIOA
+#define L293D_PWM_Pin GPIO_PIN_7
+#define L293D_PWM_GPIO_Port GPIOA
+#define L293D_EN_Pin GPIO_PIN_8
+#define L293D_EN_GPIO_Port GPIOA
+#define L293D_SER_Pin GPIO_PIN_9
+#define L293D_SER_GPIO_Port GPIOA
+#define L293D_CLK_Pin GPIO_PIN_5
+#define L293D_CLK_GPIO_Port GPIOB
+#define SG90_PWM_Pin GPIO_PIN_6
+#define SG90_PWM_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
