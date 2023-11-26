@@ -22,6 +22,7 @@ FILE(GLOB ST_CONFIGURATION_SOURCES
 )
 FILE(GLOB_RECURSE HAL_DRIVERS_SOURCES
     Drivers/*/*.c
+    Middlewares/*/*.c
 )
 
 # User files
