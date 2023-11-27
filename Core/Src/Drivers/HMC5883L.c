@@ -1,10 +1,12 @@
 // I2Cdev library collection - HMC5883L I2C device class
-// Based on Honeywell HMC5883L datasheet, 10/2010 (Form #900405 Rev B)
-// 6/12/2012 by Jeff Rowberg <jeff@rowberg.net>
-// 6/6/2015 by Andrey Voloshin <voloshin@think.in.ua>
+// Based on Honeywell HMC5883L datasheet, 10/2010 (Form
+// #900405 Rev B) 6/12/2012 by Jeff Rowberg
+// <jeff@rowberg.net> 6/6/2015 by Andrey Voloshin
+// <voloshin@think.in.ua>
 //
 // Changelog:
-//      2015-06-06 - ported to STM32 HAL library from Arduino code
+//      2015-06-06 - ported to STM32 HAL library from
+//      Arduino code
 //     2012-06-12 - fixed swapped Y/Z axes
 //     2011-08-22 - small Doxygen comment fixes
 //     2011-07-31 - initial release
@@ -13,29 +15,33 @@
 I2Cdev device library code is placed under the MIT license
 Copyright (c) 2012 Jeff Rowberg
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall
+be included in all copies or substantial portions of the
+Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ===============================================
 */
 
-/* Biblioteca baseada no código i2cdevlib, disponível no link:
-* https://github.com/jrowberg/i2cdevlib/tree/master
-*/
+/* Biblioteca baseada no código i2cdevlib, disponível no
+ * link: https://github.com/jrowberg/i2cdevlib/tree/master
+ */
 
 #include "Drivers/HMC5883L.h"
 
@@ -43,22 +49,34 @@ static uint8_t devAddr;
 static uint8_t buffer[6];
 static uint8_t mode;
 
+extern I2C_HandleTypeDef hi2c1;
 
 /** Power on and prepare for general usage.
- * This will prepare the magnetometer with default settings, ready for single-
- * use mode (very low power requirements). Default settings include 8-sample
- * averaging, 15 Hz data output rate, normal measurement bias, a,d 1090 gain (in
- * terms of LSB/Gauss). Be sure to adjust any settings you need specifically
- * after initialization, especially the gain settings if you happen to be seeing
- * a lot of -4096 values (see the datasheet for mor information).
+ * This will prepare the magnetometer with default settings,
+ * ready for single- use mode (very low power requirements).
+ * Default settings include 8-sample averaging, 15 Hz data
+ * output rate, normal measurement bias, a,d 1090 gain (in
+ * terms of LSB/Gauss). Be sure to adjust any settings you
+ * need specifically after initialization, especially the
+ * gain settings if you happen to be seeing a lot of -4096
+ * values (see the datasheet for mor information).
  */
 void HMC5883LDriver_Init() {
+    I2Cdev_init(&hi2c1);
     devAddr = HMC5883L_DEFAULT_ADDRESS;
     // write CONFIG_A register
-    I2Cdev_writeByte(devAddr, HMC5883L_RA_CONFIG_A,
-        (HMC5883L_AVERAGING_8 << (HMC5883L_CRA_AVERAGE_BIT - HMC5883L_CRA_AVERAGE_LENGTH + 1)) |
-        (HMC5883L_RATE_15     << (HMC5883L_CRA_RATE_BIT - HMC5883L_CRA_RATE_LENGTH + 1)) |
-        (HMC5883L_BIAS_NORMAL << (HMC5883L_CRA_BIAS_BIT - HMC5883L_CRA_BIAS_LENGTH + 1)));
+    I2Cdev_writeByte(
+        devAddr,
+        HMC5883L_RA_CONFIG_A,
+        (HMC5883L_AVERAGING_8
+         << (HMC5883L_CRA_AVERAGE_BIT -
+             HMC5883L_CRA_AVERAGE_LENGTH + 1)) |
+            (HMC5883L_RATE_15
+             << (HMC5883L_CRA_RATE_BIT -
+                 HMC5883L_CRA_RATE_LENGTH + 1)) |
+            (HMC5883L_BIAS_NORMAL
+             << (HMC5883L_CRA_BIAS_BIT -
+                 HMC5883L_CRA_BIAS_LENGTH + 1)));
 
     // write CONFIG_B register
     HMC5883L_setGain(HMC5883L_GAIN_1090);
@@ -68,12 +86,15 @@ void HMC5883LDriver_Init() {
 }
 
 /** Verify the I2C connection.
- * Make sure the device is connected and responds as expected.
+ * Make sure the device is connected and responds as
+ * expected.
  * @return True if connection is valid, false otherwise
  */
 bool HMC5883L_testConnection() {
-    if (I2Cdev_readBytes(devAddr, HMC5883L_RA_ID_A, 3, buffer, 0) == 3) {
-        return (buffer[0] == 'H' && buffer[1] == '4' && buffer[2] == '3');
+    if (I2Cdev_readBytes(
+            devAddr, HMC5883L_RA_ID_A, 3, buffer, 0) == 3) {
+        return (buffer[0] == 'H' && buffer[1] == '4' &&
+                buffer[2] == '3');
     }
     return false;
 }
@@ -81,30 +102,42 @@ bool HMC5883L_testConnection() {
 // CONFIG_A register
 
 /** Get number of samples averaged per measurement.
- * @return Current samples averaged per measurement (0-3 for 1/2/4/8 respectively)
+ * @return Current samples averaged per measurement (0-3 for
+ * 1/2/4/8 respectively)
  * @see HMC5883L_AVERAGING_8
  * @see HMC5883L_RA_CONFIG_A
  * @see HMC5883L_CRA_AVERAGE_BIT
  * @see HMC5883L_CRA_AVERAGE_LENGTH
  */
 uint8_t HMC5883L_getSampleAveraging() {
-    I2Cdev_readBits(devAddr, HMC5883L_RA_CONFIG_A, HMC5883L_CRA_AVERAGE_BIT, HMC5883L_CRA_AVERAGE_LENGTH, buffer, 0);
+    I2Cdev_readBits(devAddr,
+                    HMC5883L_RA_CONFIG_A,
+                    HMC5883L_CRA_AVERAGE_BIT,
+                    HMC5883L_CRA_AVERAGE_LENGTH,
+                    buffer,
+                    0);
     return buffer[0];
 }
 /** Set number of samples averaged per measurement.
- * @param averaging New samples averaged per measurement setting(0-3 for 1/2/4/8 respectively)
+ * @param averaging New samples averaged per measurement
+ * setting(0-3 for 1/2/4/8 respectively)
  * @see HMC5883L_RA_CONFIG_A
  * @see HMC5883L_CRA_AVERAGE_BIT
  * @see HMC5883L_CRA_AVERAGE_LENGTH
  */
 void HMC5883L_setSampleAveraging(uint8_t averaging) {
-    I2Cdev_writeBits(devAddr, HMC5883L_RA_CONFIG_A, HMC5883L_CRA_AVERAGE_BIT, HMC5883L_CRA_AVERAGE_LENGTH, averaging);
+    I2Cdev_writeBits(devAddr,
+                     HMC5883L_RA_CONFIG_A,
+                     HMC5883L_CRA_AVERAGE_BIT,
+                     HMC5883L_CRA_AVERAGE_LENGTH,
+                     averaging);
 }
 /** Get data output rate value.
- * The Table below shows all selectable output rates in continuous measurement
- * mode. All three channels shall be measured within a given output rate. Other
- * output rates with maximum rate of 160 Hz can be achieved by monitoring DRDY
- * interrupt pin in single measurement mode.
+ * The Table below shows all selectable output rates in
+ * continuous measurement mode. All three channels shall be
+ * measured within a given output rate. Other output rates
+ * with maximum rate of 160 Hz can be achieved by monitoring
+ * DRDY interrupt pin in single measurement mode.
  *
  * Value | Typical Data Output Rate (Hz)
  * ------+------------------------------
@@ -124,7 +157,12 @@ void HMC5883L_setSampleAveraging(uint8_t averaging) {
  * @see HMC5883L_CRA_RATE_LENGTH
  */
 uint8_t HMC5883L_getDataRate() {
-    I2Cdev_readBits(devAddr, HMC5883L_RA_CONFIG_A, HMC5883L_CRA_RATE_BIT, HMC5883L_CRA_RATE_LENGTH, buffer, 0);
+    I2Cdev_readBits(devAddr,
+                    HMC5883L_RA_CONFIG_A,
+                    HMC5883L_CRA_RATE_BIT,
+                    HMC5883L_CRA_RATE_LENGTH,
+                    buffer,
+                    0);
     return buffer[0];
 }
 /** Set data output rate value.
@@ -136,37 +174,54 @@ uint8_t HMC5883L_getDataRate() {
  * @see HMC5883L_CRA_RATE_LENGTH
  */
 void HMC5883L_setDataRate(uint8_t rate) {
-    I2Cdev_writeBits(devAddr, HMC5883L_RA_CONFIG_A, HMC5883L_CRA_RATE_BIT, HMC5883L_CRA_RATE_LENGTH, rate);
+    I2Cdev_writeBits(devAddr,
+                     HMC5883L_RA_CONFIG_A,
+                     HMC5883L_CRA_RATE_BIT,
+                     HMC5883L_CRA_RATE_LENGTH,
+                     rate);
 }
 /** Get measurement bias value.
- * @return Current bias value (0-2 for normal/positive/negative respectively)
+ * @return Current bias value (0-2 for
+ * normal/positive/negative respectively)
  * @see HMC5883L_BIAS_NORMAL
  * @see HMC5883L_RA_CONFIG_A
  * @see HMC5883L_CRA_BIAS_BIT
  * @see HMC5883L_CRA_BIAS_LENGTH
  */
 uint8_t HMC5883L_getMeasurementBias() {
-    I2Cdev_readBits(devAddr, HMC5883L_RA_CONFIG_A, HMC5883L_CRA_BIAS_BIT, HMC5883L_CRA_BIAS_LENGTH, buffer, 0);
+    I2Cdev_readBits(devAddr,
+                    HMC5883L_RA_CONFIG_A,
+                    HMC5883L_CRA_BIAS_BIT,
+                    HMC5883L_CRA_BIAS_LENGTH,
+                    buffer,
+                    0);
     return buffer[0];
 }
 /** Set measurement bias value.
- * @param bias New bias value (0-2 for normal/positive/negative respectively)
+ * @param bias New bias value (0-2 for
+ * normal/positive/negative respectively)
  * @see HMC5883L_BIAS_NORMAL
  * @see HMC5883L_RA_CONFIG_A
  * @see HMC5883L_CRA_BIAS_BIT
  * @see HMC5883L_CRA_BIAS_LENGTH
  */
 void HMC5883L_setMeasurementBias(uint8_t bias) {
-    I2Cdev_writeBits(devAddr, HMC5883L_RA_CONFIG_A, HMC5883L_CRA_BIAS_BIT, HMC5883L_CRA_BIAS_LENGTH, bias);
+    I2Cdev_writeBits(devAddr,
+                     HMC5883L_RA_CONFIG_A,
+                     HMC5883L_CRA_BIAS_BIT,
+                     HMC5883L_CRA_BIAS_LENGTH,
+                     bias);
 }
 
 // CONFIG_B register
 
 /** Get magnetic field gain value.
- * The table below shows nominal gain settings. Use the "Gain" column to convert
- * counts to Gauss. Choose a lower gain value (higher GN#) when total field
- * strength causes overflow in one of the data output registers (saturation).
- * The data output range for all settings is 0xF800-0x07FF (-2048 - 2047).
+ * The table below shows nominal gain settings. Use the
+ * "Gain" column to convert counts to Gauss. Choose a lower
+ * gain value (higher GN#) when total field strength causes
+ * overflow in one of the data output registers
+ * (saturation). The data output range for all settings is
+ * 0xF800-0x07FF (-2048 - 2047).
  *
  * Value | Field Range | Gain (LSB/Gauss)
  * ------+-------------+-----------------
@@ -186,7 +241,12 @@ void HMC5883L_setMeasurementBias(uint8_t bias) {
  * @see HMC5883L_CRB_GAIN_LENGTH
  */
 uint8_t HMC5883L_getGain() {
-    I2Cdev_readBits(devAddr, HMC5883L_RA_CONFIG_B, HMC5883L_CRB_GAIN_BIT, HMC5883L_CRB_GAIN_LENGTH, buffer, 0);
+    I2Cdev_readBits(devAddr,
+                    HMC5883L_RA_CONFIG_B,
+                    HMC5883L_CRB_GAIN_BIT,
+                    HMC5883L_CRB_GAIN_LENGTH,
+                    buffer,
+                    0);
     return buffer[0];
 }
 /** Set magnetic field gain value.
@@ -197,27 +257,36 @@ uint8_t HMC5883L_getGain() {
  * @see HMC5883L_CRB_GAIN_LENGTH
  */
 void HMC5883L_setGain(uint8_t gain) {
-    // use this method to guarantee that bits 4-0 are set to zero, which is a
-    // requirement specified in the datasheet; it's actually more efficient than
-    // using the I2Cdev.writeBits method
-    I2Cdev_writeByte(devAddr, HMC5883L_RA_CONFIG_B, gain << (HMC5883L_CRB_GAIN_BIT - HMC5883L_CRB_GAIN_LENGTH + 1));
+    // use this method to guarantee that bits 4-0 are set to
+    // zero, which is a requirement specified in the
+    // datasheet; it's actually more efficient than using
+    // the I2Cdev.writeBits method
+    I2Cdev_writeByte(devAddr,
+                     HMC5883L_RA_CONFIG_B,
+                     gain
+                         << (HMC5883L_CRB_GAIN_BIT -
+                             HMC5883L_CRB_GAIN_LENGTH + 1));
 }
 
 // MODE register
 
 /** Get measurement mode.
- * In continuous-measurement mode, the device continuously performs measurements
- * and places the result in the data register. RDY goes high when new data is
- * placed in all three registers. After a power-on or a write to the mode or
- * configuration register, the first measurement set is available from all three
- * data output registers after a period of 2/fDO and subsequent measurements are
- * available at a frequency of fDO, where fDO is the frequency of data output.
+ * In continuous-measurement mode, the device continuously
+ * performs measurements and places the result in the data
+ * register. RDY goes high when new data is placed in all
+ * three registers. After a power-on or a write to the mode
+ * or configuration register, the first measurement set is
+ * available from all three data output registers after a
+ * period of 2/fDO and subsequent measurements are available
+ * at a frequency of fDO, where fDO is the frequency of data
+ * output.
  *
- * When single-measurement mode (default) is selected, device performs a single
- * measurement, sets RDY high and returned to idle mode. Mode register returns
- * to idle mode bit values. The measurement remains in the data output register
- * and RDY remains high until the data output register is read or another
- * measurement is performed.
+ * When single-measurement mode (default) is selected,
+ * device performs a single measurement, sets RDY high and
+ * returned to idle mode. Mode register returns to idle mode
+ * bit values. The measurement remains in the data output
+ * register and RDY remains high until the data output
+ * register is read or another measurement is performed.
  *
  * @return Current measurement mode
  * @see HMC5883L_MODE_CONTINUOUS
@@ -228,7 +297,12 @@ void HMC5883L_setGain(uint8_t gain) {
  * @see HMC5883L_MODEREG_LENGTH
  */
 uint8_t HMC5883L_getMode() {
-    I2Cdev_readBits(devAddr, HMC5883L_RA_MODE, HMC5883L_MODEREG_BIT, HMC5883L_MODEREG_LENGTH, buffer, 0);
+    I2Cdev_readBits(devAddr,
+                    HMC5883L_RA_MODE,
+                    HMC5883L_MODEREG_BIT,
+                    HMC5883L_MODEREG_LENGTH,
+                    buffer,
+                    0);
     return buffer[0];
 }
 /** Set measurement mode.
@@ -242,29 +316,49 @@ uint8_t HMC5883L_getMode() {
  * @see HMC5883L_MODEREG_LENGTH
  */
 void HMC5883L_setMode(uint8_t newMode) {
-    // use this method to guarantee that bits 7-2 are set to zero, which is a
-    // requirement specified in the datasheet; it's actually more efficient than
-    // using the I2Cdev.writeBits method
-    I2Cdev_writeByte(devAddr, HMC5883L_RA_MODE, newMode << (HMC5883L_MODEREG_BIT - HMC5883L_MODEREG_LENGTH + 1));
-    mode = newMode; // track to tell if we have to clear bit 7 after a read
+    // use this method to guarantee that bits 7-2 are set to
+    // zero, which is a requirement specified in the
+    // datasheet; it's actually more efficient than using
+    // the I2Cdev.writeBits method
+    I2Cdev_writeByte(devAddr,
+                     HMC5883L_RA_MODE,
+                     newMode
+                         << (HMC5883L_MODEREG_BIT -
+                             HMC5883L_MODEREG_LENGTH + 1));
+    mode = newMode; // track to tell if we have to clear bit
+                    // 7 after a read
 }
 
 // DATA* registers
 
 /** Get 3-axis heading measurements.
- * In the event the ADC reading overflows or underflows for the given channel,
- * or if there is a math overflow during the bias measurement, this data
- * register will contain the value -4096. This register value will clear when
- * after the next valid measurement is made. Note that this method automatically
- * clears the appropriate bit in the MODE register if Single mode is active.
- * @param x 16-bit signed integer container for X-axis heading
- * @param y 16-bit signed integer container for Y-axis heading
- * @param z 16-bit signed integer container for Z-axis heading
+ * In the event the ADC reading overflows or underflows for
+ * the given channel, or if there is a math overflow during
+ * the bias measurement, this data register will contain the
+ * value -4096. This register value will clear when after
+ * the next valid measurement is made. Note that this method
+ * automatically clears the appropriate bit in the MODE
+ * register if Single mode is active.
+ * @param x 16-bit signed integer container for X-axis
+ * heading
+ * @param y 16-bit signed integer container for Y-axis
+ * heading
+ * @param z 16-bit signed integer container for Z-axis
+ * heading
  * @see HMC5883L_RA_DATAX_H
  */
-void HMC5883LDriver_GetHeading(int16_t *x, int16_t *y, int16_t *z) {
-    I2Cdev_readBytes(devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
-    if (mode == HMC5883L_MODE_SINGLE) I2Cdev_writeByte(devAddr, HMC5883L_RA_MODE, HMC5883L_MODE_SINGLE << (HMC5883L_MODEREG_BIT - HMC5883L_MODEREG_LENGTH + 1));
+void HMC5883LDriver_GetHeading(int16_t* x,
+                               int16_t* y,
+                               int16_t* z) {
+    I2Cdev_readBytes(
+        devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
+    if (mode == HMC5883L_MODE_SINGLE)
+        I2Cdev_writeByte(devAddr,
+                         HMC5883L_RA_MODE,
+                         HMC5883L_MODE_SINGLE
+                             << (HMC5883L_MODEREG_BIT -
+                                 HMC5883L_MODEREG_LENGTH +
+                                 1));
     *x = (((int16_t)buffer[0]) << 8) | buffer[1];
     *y = (((int16_t)buffer[4]) << 8) | buffer[5];
     *z = (((int16_t)buffer[2]) << 8) | buffer[3];
@@ -274,10 +368,18 @@ void HMC5883LDriver_GetHeading(int16_t *x, int16_t *y, int16_t *z) {
  * @see HMC5883L_RA_DATAX_H
  */
 int16_t HMC5883L_getHeadingX() {
-    // each axis read requires that ALL axis registers be read, even if only
-    // one is used; this was not done ineffiently in the code by accident
-    I2Cdev_readBytes(devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
-    if (mode == HMC5883L_MODE_SINGLE) I2Cdev_writeByte(devAddr, HMC5883L_RA_MODE, HMC5883L_MODE_SINGLE << (HMC5883L_MODEREG_BIT - HMC5883L_MODEREG_LENGTH + 1));
+    // each axis read requires that ALL axis registers be
+    // read, even if only one is used; this was not done
+    // ineffiently in the code by accident
+    I2Cdev_readBytes(
+        devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
+    if (mode == HMC5883L_MODE_SINGLE)
+        I2Cdev_writeByte(devAddr,
+                         HMC5883L_RA_MODE,
+                         HMC5883L_MODE_SINGLE
+                             << (HMC5883L_MODEREG_BIT -
+                                 HMC5883L_MODEREG_LENGTH +
+                                 1));
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
 /** Get Y-axis heading measurement.
@@ -285,10 +387,18 @@ int16_t HMC5883L_getHeadingX() {
  * @see HMC5883L_RA_DATAY_H
  */
 int16_t HMC5883L_getHeadingY() {
-    // each axis read requires that ALL axis registers be read, even if only
-    // one is used; this was not done ineffiently in the code by accident
-    I2Cdev_readBytes(devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
-    if (mode == HMC5883L_MODE_SINGLE) I2Cdev_writeByte(devAddr, HMC5883L_RA_MODE, HMC5883L_MODE_SINGLE << (HMC5883L_MODEREG_BIT - HMC5883L_MODEREG_LENGTH + 1));
+    // each axis read requires that ALL axis registers be
+    // read, even if only one is used; this was not done
+    // ineffiently in the code by accident
+    I2Cdev_readBytes(
+        devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
+    if (mode == HMC5883L_MODE_SINGLE)
+        I2Cdev_writeByte(devAddr,
+                         HMC5883L_RA_MODE,
+                         HMC5883L_MODE_SINGLE
+                             << (HMC5883L_MODEREG_BIT -
+                                 HMC5883L_MODEREG_LENGTH +
+                                 1));
     return (((int16_t)buffer[4]) << 8) | buffer[5];
 }
 /** Get Z-axis heading measurement.
@@ -296,27 +406,39 @@ int16_t HMC5883L_getHeadingY() {
  * @see HMC5883L_RA_DATAZ_H
  */
 int16_t HMC5883L_getHeadingZ() {
-    // each axis read requires that ALL axis registers be read, even if only
-    // one is used; this was not done ineffiently in the code by accident
-    I2Cdev_readBytes(devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
-    if (mode == HMC5883L_MODE_SINGLE) I2Cdev_writeByte(devAddr, HMC5883L_RA_MODE, HMC5883L_MODE_SINGLE << (HMC5883L_MODEREG_BIT - HMC5883L_MODEREG_LENGTH + 1));
+    // each axis read requires that ALL axis registers be
+    // read, even if only one is used; this was not done
+    // ineffiently in the code by accident
+    I2Cdev_readBytes(
+        devAddr, HMC5883L_RA_DATAX_H, 6, buffer, 0);
+    if (mode == HMC5883L_MODE_SINGLE)
+        I2Cdev_writeByte(devAddr,
+                         HMC5883L_RA_MODE,
+                         HMC5883L_MODE_SINGLE
+                             << (HMC5883L_MODEREG_BIT -
+                                 HMC5883L_MODEREG_LENGTH +
+                                 1));
     return (((int16_t)buffer[2]) << 8) | buffer[3];
 }
 
-//function that returns the offset by comparing HMC5883 data in a default state and a cellphone aproximation
+// function that returns the offset by comparing HMC5883
+// data in a default state and a cellphone aproximation
 calibration_offset_t HMC5883LDriver_Calibration() {
     int16_t x_cellphone, y_cellphone, z_cellphone;
     int16_t x_default, y_default, z_default;
     calibration_offset_t offsets;
 
     // Get default readings from your HMC5883L sensor
-    HMC5883LDriver_GetHeading(&x_default, &y_default, &z_default);
+    HMC5883LDriver_GetHeading(
+        &x_default, &y_default, &z_default);
 
-    // Delay to allow time for the cellphone magnetometer to stabilize
+    // Delay to allow time for the cellphone magnetometer to
+    // stabilize
     HAL_Delay(10000); // Adjust the delay as needed
 
     // Get readings from the cellphone magnetometer
-    HMC5883LDriver_GetHeading(&x_cellphone, &y_cellphone, &z_cellphone);
+    HMC5883LDriver_GetHeading(
+        &x_cellphone, &y_cellphone, &z_cellphone);
 
     // Calculate offsets
     offsets.x_axis = x_default - x_cellphone;
@@ -326,31 +448,36 @@ calibration_offset_t HMC5883LDriver_Calibration() {
     return offsets;
 }
 
-    // 1.  Write CRA (00) – send 0x3C 0x00 0x71 (8-average, 15 Hz default, positive self test measurement) 
-	// 2.  Write CRB (01) – send 0x3C 0x01 0xA0 (Gain=5) 
-	// 3.  Write Mode (02) – send 0x3C 0x02 0x00 (Continuous-measurement mode) 
-	// 4.  Wait 6 ms or monitor status register or DRDY hardware interrupt pin 
-	// 5. Loop 
-	// Send 0x3D 0x06 (Read all 6 bytes. If gain is changed then this data set is using previous gain) 
-	// Convert three 16-bit 2’s compliment hex values to decimal values and assign to X, Z, Y, respectively. 
-	// Send 0x3C 0x03 (point to first data register 03) 
-	// Wait about 67 ms (if 15 Hz rate) or monitor status register or DRDY hardware interrupt pin End_loop 6.  
-	// Check limits – 
-	// If all 3 axes (X, Y, and Z) are within reasonable limits (243 to 575 for Gain=5, adjust these limits 
-	// basing on the gain setting used. See an example below.) 
-	// Then   All 3 axes pass positive self test   
-	// Write CRA (00) – send 0x3C 0x00 0x70 (Exit self test mode and this procedure) 
-	// Else   If Gain<7 Write CRB (01) – send 0x3C 0x01 0x_0 (Increase gain setting and retry, skip the next data set) 
-	// Else  At least one axis did not pass positive self test 
-	// Write CRA (00) – send 0x3C 0x00 0x70 (Exit self test mode and this procedure) 
-	// End If  Below is an example of how to adjust the “positive self” test limits basing on the gain setting: 
-	// 1.  If Gain = 6, self test limits are:  
-	// Low Limit = 243 * 330/390 = 206 
-	// High Limit = 575 * 330/390 = 487  
-	// 2.  If Gain = 7, self test limits are:  
-	// Low Limit = 243 * 230/390 = 143 
-	// High Limit = 575 * 230/390 = 339
-void self_test_operation() {
-
-}
-
+// 1.  Write CRA (00) – send 0x3C 0x00 0x71 (8-average, 15
+// Hz default, positive self test measurement)
+// 2.  Write CRB (01) – send 0x3C 0x01 0xA0 (Gain=5)
+// 3.  Write Mode (02) – send 0x3C 0x02 0x00
+// (Continuous-measurement mode)
+// 4.  Wait 6 ms or monitor status register or DRDY hardware
+// interrupt pin
+// 5. Loop
+// Send 0x3D 0x06 (Read all 6 bytes. If gain is changed then
+// this data set is using previous gain) Convert three
+// 16-bit 2’s compliment hex values to decimal values and
+// assign to X, Z, Y, respectively. Send 0x3C 0x03 (point to
+// first data register 03) Wait about 67 ms (if 15 Hz rate)
+// or monitor status register or DRDY hardware interrupt pin
+// End_loop 6. Check limits – If all 3 axes (X, Y, and Z)
+// are within reasonable limits (243 to 575 for Gain=5,
+// adjust these limits basing on the gain setting used. See
+// an example below.) Then   All 3 axes pass positive self
+// test Write CRA (00) – send 0x3C 0x00 0x70 (Exit self test
+// mode and this procedure) Else   If Gain<7 Write CRB (01)
+// – send 0x3C 0x01 0x_0 (Increase gain setting and retry,
+// skip the next data set) Else  At least one axis did not
+// pass positive self test Write CRA (00) – send 0x3C 0x00
+// 0x70 (Exit self test mode and this procedure) End If
+// Below is an example of how to adjust the “positive self”
+// test limits basing on the gain setting:
+// 1.  If Gain = 6, self test limits are:
+// Low Limit = 243 * 330/390 = 206
+// High Limit = 575 * 330/390 = 487
+// 2.  If Gain = 7, self test limits are:
+// Low Limit = 243 * 230/390 = 143
+// High Limit = 575 * 230/390 = 339
+void self_test_operation() {}

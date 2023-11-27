@@ -20,7 +20,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define RAD_TO_DEGREES(x) (((x)*180) / M_PI)
+#define RAD_TO_DEGREES(x) (((x) * 180) / M_PI)
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
@@ -37,6 +37,8 @@
 
 #define TARGET_BEACON_X BEACON_1_X
 #define TARGET_BEACON_Y BEACON_1_Y
+
+volatile float angleDebug;
 
 /**
  * @brief Calculates the distance (radius) with the signal
@@ -108,34 +110,35 @@ static calibration_offset_t HMC_offset;
 
 void NavigationService_Init() {
     PowerControlDriver_Init();
-    RudderControlDriver_Init();
+    // RudderControlDriver_Init();
     HMC5883LDriver_Init();
 
     HMC_offset = HMC5883LDriver_Calibration();
 }
 
 void NavigationService_Handler() {
-    SlaveDevice_t slaves[3];
-    BLE_scan_slaves_and_save(slaves, 3);
+    // SlaveDevice_t slaves[3];
+    // BLE_scan_slaves_and_save(slaves, 3);
 
     float currentX;
     float currentY;
 
-    TrilateratePosition(
-        GetDistanceFromBeacon(slaves[1].signal_rssi),
-        GetDistanceFromBeacon(slaves[2].signal_rssi),
-        GetDistanceFromBeacon(slaves[3].signal_rssi),
-        &currentX,
-        &currentY);
+    // TrilateratePosition(
+    //     GetDistanceFromBeacon(slaves[1].signal_rssi),
+    //     GetDistanceFromBeacon(slaves[2].signal_rssi),
+    //     GetDistanceFromBeacon(slaves[3].signal_rssi),
+    //     &currentX,
+    //     &currentY);
 
-    float desiredAngle =
-        GetDesiredAngle(currentX, currentY);
+    // float desiredAngle =
+    //     GetDesiredAngle(currentX, currentY);
     float detectedAngle = GetAngleFromNorth();
-    PowerControlDriver_SetPower(
-        GetPowerPercentage(detectedAngle, desiredAngle),
-        false);
-    RudderControlDriver_SetAngle(
-        GetRudderAngle(detectedAngle, desiredAngle));
+    angleDebug          = detectedAngle;
+    // PowerControlDriver_SetPower(
+    //     GetPowerPercentage(detectedAngle, desiredAngle),
+    //     false);
+    // RudderControlDriver_SetAngle(
+    //     GetRudderAngle(detectedAngle, desiredAngle));
 }
 
 float GetDistanceFromBeacon(float signalStrength) {
