@@ -25,12 +25,12 @@
 #define POWER_KP  1
 #define RUDDER_KP 1.5
 
-#define BEACON_1_X 0
-#define BEACON_1_Y 0
-#define BEACON_2_X 0
-#define BEACON_2_Y 0
-#define BEACON_3_X 0
-#define BEACON_3_Y 0
+#define BEACON_1_X -19.866425 //saída x
+#define BEACON_1_Y -43.964556 //saída y
+#define BEACON_2_X -19.866733  //chegada x
+#define BEACON_2_Y -43.964666 //chegada y
+#define BEACON_3_X -19.866581 //beacon x
+#define BEACON_3_Y -43.964787 //beacon y
 
 #define TARGET_BEACON_X BEACON_1_X
 #define TARGET_BEACON_Y BEACON_1_Y
