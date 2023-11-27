@@ -26,8 +26,8 @@
  */
 bool timer_wait_ms(uint32_t timer_start, uint32_t delay);
 /**
- * @brief Restart timer to current tick value.
+ * @brief Update timer to current tick value.
  *
- * @param timer_to_restart Address of timer specifier.
+ * @return current time value
  */
-void timer_restart(uint32_t* timer_to_restart);
+uint32_t timer_update(void);

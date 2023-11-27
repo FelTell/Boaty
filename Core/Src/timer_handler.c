@@ -10,6 +10,6 @@ bool timer_wait_ms(uint32_t timer_start, uint32_t delay) {
     return false;
 }
 
-void timer_restart(uint32_t* timer_to_restart) {
-    *timer_to_restart = HAL_GetTick();
+uint32_t timer_update(void) {
+    return HAL_GetTick();
 }

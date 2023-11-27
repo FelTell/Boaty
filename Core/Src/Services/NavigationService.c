@@ -16,6 +16,7 @@
 #include "Drivers/CompassDriver.h"
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
+#include "timer_handler.h"
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
@@ -94,17 +95,29 @@ float GetRudderAngle(float detected, float desired);
 
 void NavigationService_Init() {
     PowerControlDriver_Init();
-    HAL_Delay(200);
     // RudderControlDriver_Init();
-    CompassDriver_Init();
+
+    // Small delay to allow sensors power up
+    HAL_Delay(10);
+    while (!CompassDriver_Init()) {
+        // try to init until it is successful
+    }
 }
 
 void NavigationService_Handler() {
+    static uint32_t timer;
+
+    // Run this function periodically
+    if (!timer_wait_ms(timer, 100)) {
+        return;
+    }
+    timer = timer_update();
+
     // SlaveDevice_t slaves[3];
     // BLE_scan_slaves_and_save(slaves, 3);
 
-    float currentX;
-    float currentY;
+    // float currentX;
+    // float currentY;
 
     // TrilateratePosition(
     //     GetDistanceFromBeacon(slaves[1].signal_rssi),
@@ -127,7 +140,6 @@ void NavigationService_Handler() {
     //     false);
     // RudderControlDriver_SetAngle(
     //     GetRudderAngle(detectedAngle, desiredAngle));
-    HAL_Delay(200);
 }
 
 float GetDistanceFromBeacon(float signalStrength) {

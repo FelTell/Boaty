@@ -10,8 +10,6 @@ void SystemController_Init(void) {
 }
 
 void SystemController_Run(void) {
-    // TODO (Felipe): use "timer" to keep cycles with
-    // defined period
     NavigationService_Handler();
 }
 
