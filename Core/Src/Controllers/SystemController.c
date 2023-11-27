@@ -1,6 +1,5 @@
 #include "Controllers/SystemController.h"
 
-#include "Drivers/HMC5883L.h"
 #include "Services/NavigationService.h"
 #include "main.h"
 

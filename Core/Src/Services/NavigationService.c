@@ -13,7 +13,7 @@
 #include "Services/NavigationService.h"
 
 #include "Drivers/BLE_JDY_18.h"
-#include "Drivers/HMC5883L.h"
+#include "Drivers/HMC5883LDriver.h"
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
 
@@ -110,10 +110,11 @@ static calibration_offset_t HMC_offset;
 
 void NavigationService_Init() {
     PowerControlDriver_Init();
+    HAL_Delay(1000);
     // RudderControlDriver_Init();
     HMC5883LDriver_Init();
 
-    HMC_offset = HMC5883LDriver_Calibration();
+    // HMC_offset = HMC5883LDriver_Calibration();
 }
 
 void NavigationService_Handler() {
@@ -139,6 +140,7 @@ void NavigationService_Handler() {
     //     false);
     // RudderControlDriver_SetAngle(
     //     GetRudderAngle(detectedAngle, desiredAngle));
+    HAL_Delay(1000);
 }
 
 float GetDistanceFromBeacon(float signalStrength) {
@@ -181,7 +183,11 @@ float GetAngleFromNorth() {
     compassY -= HMC_offset.y_axis;
     compassZ -= HMC_offset.z_axis;
 
-    return RAD_TO_DEGREES(atanf(compassX / compassY));
+    const float angleDegrees =
+        RAD_TO_DEGREES(atan2(compassY, compassX));
+
+    return angleDegrees < 0 ? 360 + angleDegrees
+                            : angleDegrees;
 }
 
 float GetDesiredAngle(float x, float y) {
