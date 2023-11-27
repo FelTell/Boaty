@@ -10,7 +10,7 @@
 
 #define MIN_PWM_VALUE     28
 #define MAX_PWM_VALUE     127
-#define NEUTRAL_PWM_VALUE 77
+#define NEUTRAL_PWM_VALUE 85
 
 #define ANGLE_TO_PWM_INTERCEPT NEUTRAL_PWM_VALUE
 #define ANGLE_TO_PWM_SLOPE                                 \
@@ -37,7 +37,7 @@ void RudderControlDriver_SetAngle(int32_t angle) {
         return;
     }
 
-    UTILS_CLAMP(angle, MIN_ANGLE, MAX_ANGLE);
+    UTILS_CLAMP(angle, -55, 55);
 
     const int32_t pwmValue = ANGLE_TO_PWM(angle);
 

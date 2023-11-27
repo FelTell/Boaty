@@ -22,7 +22,7 @@
 // boat is ready and in our hands
 #define BLE_POWER 0
 #define POWER_KP  0
-#define RUDDER_KP 0
+#define RUDDER_KP 1.5
 
 #define BEACON_1_X 0
 #define BEACON_1_Y 0
@@ -95,7 +95,7 @@ float GetRudderAngle(float detected, float desired);
 
 void NavigationService_Init() {
     PowerControlDriver_Init();
-    // RudderControlDriver_Init();
+    RudderControlDriver_Init();
 
     // Small delay to allow sensors power up
     HAL_Delay(10);
@@ -138,8 +138,8 @@ void NavigationService_Handler() {
     // PowerControlDriver_SetPower(
     //     GetPowerPercentage(detectedAngle, desiredAngle),
     //     false);
-    // RudderControlDriver_SetAngle(
-    //     GetRudderAngle(detectedAngle, desiredAngle));
+    RudderControlDriver_SetAngle(
+        GetRudderAngle(detectedAngle, 0));
 }
 
 float GetDistanceFromBeacon(float signalStrength) {
