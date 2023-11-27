@@ -18,12 +18,15 @@
 
 /**
  * @brief Configure  configuration and mode registers.
- * Others register are set as default
+ * Others register are set as default. Allows calibration.
+ * For calibration the compass should be placed facing north
+ * and it will take some seconds to calibrate.
  *
+ * @param calibrationNeeded true if calibration is needed
  * @return true ok
  * @return false not ok
  */
-bool CompassDriver_Init();
+bool CompassDriver_Init(bool calibrationNeeded);
 
 /**
  * @brief Get the Angle relative to the north

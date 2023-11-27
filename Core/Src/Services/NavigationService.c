@@ -99,7 +99,7 @@ void NavigationService_Init() {
 
     // Small delay to allow sensors power up
     HAL_Delay(10);
-    while (!CompassDriver_Init()) {
+    while (!CompassDriver_Init(true)) {
         // try to init until it is successful
     }
 }

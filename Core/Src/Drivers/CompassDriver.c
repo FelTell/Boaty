@@ -1,6 +1,7 @@
 #include "Drivers/CompassDriver.h"
 
 #include "stm32f4xx_hal.h"
+#include "timer_handler.h"
 
 extern I2C_HandleTypeDef hi2c1;
 #define I2C_HANDLER hi2c1
@@ -39,6 +40,8 @@ static bool SetContinousMode(void);
  */
 static bool GetHeadings(int16_t* x, int16_t* y, int16_t* z);
 
+static bool CalibrateToNorth(void);
+
 /**
  * @brief Write to i2c
  *
@@ -64,9 +67,10 @@ static bool Write(uint8_t address, uint8_t* data,
 static bool Read(uint8_t address, uint8_t* data,
                  uint16_t size);
 
-static bool initDone = false;
+static bool initDone           = false;
+static float calibrationFactor = 0;
 
-bool CompassDriver_Init(void) {
+bool CompassDriver_Init(bool calibrationNeeded) {
     if (initDone) {
         return true;
     }
@@ -78,6 +82,14 @@ bool CompassDriver_Init(void) {
     }
 
     initDone = true;
+    
+    if (calibrationNeeded) {
+        if (!CalibrateToNorth()) {
+            initDone = false;
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -91,7 +103,8 @@ bool CompassDriver_GetAngle(float* angle) {
     if (!GetHeadings(&compassX, &compassY, &compassZ)) {
         return false;
     }
-    *angle = RAD_TO_DEGREES(atan2(compassY, compassX));
+    *angle = RAD_TO_DEGREES(atan2(compassY, compassX)) +
+             calibrationFactor;
     return true;
 }
 
@@ -122,6 +135,34 @@ static bool SetContinousMode(void) {
     uint8_t modeRegister = 0b000'0000;
     return Write(
         MODE_REGISTER, &modeRegister, sizeof(modeRegister));
+}
+
+static bool CalibrateToNorth(void) {
+    calibrationFactor = 0;
+
+    const uint32_t stabilizingTimer = timer_update();
+    while (!timer_wait_ms(stabilizingTimer, 1000)) {}
+
+    const uint32_t gettingValuesTimer = timer_update();
+    uint32_t pollTimer                = timer_update();
+    uint32_t count                    = 0;
+    float sum                         = 0;
+    while (!timer_wait_ms(gettingValuesTimer, 5000)) {
+        if (timer_wait_ms(pollTimer, 100)) {
+            float detectedAngle;
+            if (!CompassDriver_GetAngle(&detectedAngle)) {
+                return false;
+            }
+            count++;
+            sum += detectedAngle;
+            pollTimer = timer_update();
+        }
+    }
+
+    const float average = sum / count;
+    calibrationFactor   = 0 - average;
+
+    return true;
 }
 
 static bool Write(uint8_t address, uint8_t* data,
