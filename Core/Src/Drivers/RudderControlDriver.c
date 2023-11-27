@@ -1,6 +1,7 @@
 #include "Drivers/RudderControlDriver.h"
 
 #include "Drivers/PwmDriver.h"
+#include "global_instances.h"
 
 #include <Utils.h>
 #include <stdbool.h>
@@ -19,24 +20,24 @@
 #define ANGLE_TO_PWM(x)                                    \
     ((float)x * ANGLE_TO_PWM_SLOPE + ANGLE_TO_PWM_INTERCEPT)
 
-static bool initDone;
+void RudderControlDriver_Handler(void* argument) {
+    (void)argument;
 
-void RudderControlDriver_Init(void) {
-    if (initDone) {
-        return;
-    }
     PwmDriver_Init();
 
     RudderControlDriver_SetAngle(0);
 
-    initDone = true;
+    for (;;) {
+        static rudderMessage_t rudderMessage;
+        osMessageQueueGet(q_rudderMessageHandle,
+                          &rudderMessage,
+                          0,
+                          osWaitForever);
+        RudderControlDriver_SetAngle(rudderMessage.angle);
+    }
 }
 
 void RudderControlDriver_SetAngle(int32_t angle) {
-    if (!initDone) {
-        return;
-    }
-
     UTILS_CLAMP(angle, MIN_ANGLE, MAX_ANGLE);
 
     const int32_t pwmValue = ANGLE_TO_PWM(angle);

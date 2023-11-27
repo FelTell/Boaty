@@ -2,33 +2,37 @@
 
 #include "Drivers/PwmDriver.h"
 #include "Drivers/ShiftRegisterDriver.h"
+#include "global_instances.h"
 
 #include <Utils.h>
 
 static void UpdateDirection();
 
-static bool initDone;
 static bool isCurrentDirectionBackwards = false;
 
-void PowerControlDriver_Init(void) {
-    if (initDone) {
-        return;
-    }
+void PowerControlDriver_Handler(void* argument) {
+    (void)argument;
     PwmDriver_Init();
     ShiftRegisterDriver_Init();
 
     UpdateDirection();
     PowerControlDriver_SetPower(0, false);
 
-    initDone = true;
+    for (;;) {
+        static powerMessage_t powerMessage;
+        osMessageQueueGet(q_powerMessageHandle,
+                          &powerMessage,
+                          0,
+                          osWaitForever);
+
+        PowerControlDriver_SetPower(
+            powerMessage.percentage,
+            powerMessage.isBackwards);
+    }
 }
 
 void PowerControlDriver_SetPower(int32_t percentage,
                                  bool isBackwards) {
-    if (!initDone) {
-        return;
-    }
-
     UTILS_CLAMP(percentage, 0, 100);
     if (isCurrentDirectionBackwards != isBackwards) {
         isCurrentDirectionBackwards = isBackwards;

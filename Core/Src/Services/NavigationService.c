@@ -105,10 +105,7 @@ uint8_t GetPowerPercentage(float detected, float desired);
  */
 float GetRudderAngle(float detected, float desired);
 
-void NavigationService_Init() {
-    PowerControlDriver_Init();
-    RudderControlDriver_Init();
-}
+void NavigationService_Init() {}
 
 void NavigationService_Handler() {
     static bleMessage_t bleMessage;
@@ -148,13 +145,17 @@ void NavigationService_Handler() {
 
         float desiredAngle =
             GetDesiredAngle(currentX, currentY);
-        PowerControlDriver_SetPower(
-            GetPowerPercentage(
-                compassMessage.angleFromNorth,
-                desiredAngle),
-            false);
-        RudderControlDriver_SetAngle(GetRudderAngle(
-            compassMessage.angleFromNorth, desiredAngle));
+
+        powerMessage.percentage = GetPowerPercentage(
+            compassMessage.angleFromNorth, desiredAngle);
+        powerMessage.isBackwards = false;
+        osMessageQueuePutOverwrite(
+            q_powerMessageHandle, &powerMessage, 0);
+
+        rudderMessage.angle = GetRudderAngle(
+            compassMessage.angleFromNorth, desiredAngle);
+        osMessageQueuePutOverwrite(
+            q_rudderMessageHandle, &rudderMessage, 0);
     }
 }
 
