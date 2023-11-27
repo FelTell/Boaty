@@ -106,8 +106,14 @@ bool CompassDriver_GetAngle(float* angle) {
     if (!GetHeadings(&compassX, &compassY, &compassZ)) {
         return false;
     }
-    *angle = RAD_TO_DEGREES(atan2(compassY, compassX)) ;
-            //  calibrationFactor;
+    *angle = RAD_TO_DEGREES(atan2(compassY, compassX)) +
+             calibrationFactor;
+
+    if (*angle > 180) {
+        *angle = *angle - 360;
+    } else if (*angle < -180) {
+        *angle = *angle + 360;
+    }
     return true;
 }
 
