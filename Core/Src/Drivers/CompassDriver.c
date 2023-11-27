@@ -64,17 +64,27 @@ static bool Write(uint8_t address, uint8_t* data,
 static bool Read(uint8_t address, uint8_t* data,
                  uint16_t size);
 
+static bool initDone = false;
+
 bool CompassDriver_Init(void) {
+    if (initDone) {
+        return true;
+    }
     if (!SetConfigurationA()) {
         return false;
     }
     if (!SetContinousMode()) {
         return false;
     }
+
+    initDone = true;
     return true;
 }
 
 bool CompassDriver_GetAngle(float* angle) {
+    if (!initDone) {
+        return false;
+    }
     int16_t compassX;
     int16_t compassY;
     int16_t compassZ;

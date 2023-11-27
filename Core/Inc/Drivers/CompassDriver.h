@@ -1,3 +1,12 @@
+/**
+ * @file CompassDriver.h
+ * @author Felipe Telles, Lucas Martins
+ * @brief For the HMC5883L magnetometer. Allows to get angle
+ * relative to north
+ * @date 27-11-2023
+ *
+ *
+ */
 #pragma once
 
 #include <stdbool.h>
