@@ -11,7 +11,10 @@ extern I2C_HandleTypeDef hi2c1;
 #define MODE_REGISTER            0x02
 #define DATA_START_REGISTER      0x03
 
-#define TIMEOUT 10
+#define CALIBRATION_STABILIZING_TIME_MS 1000
+#define CALIBRATION_SAMPLING_TIME_MS    5000
+#define CALIBRATION_POLL_TIME_MS        1000
+#define MESSAGE_TIMEOUT_MS              10
 
 /**
  * @brief Configures the configurationA register
@@ -82,7 +85,7 @@ bool CompassDriver_Init(bool calibrationNeeded) {
     }
 
     initDone = true;
-    
+
     if (calibrationNeeded) {
         if (!CalibrateToNorth()) {
             initDone = false;
@@ -141,14 +144,18 @@ static bool CalibrateToNorth(void) {
     calibrationFactor = 0;
 
     const uint32_t stabilizingTimer = timer_update();
-    while (!timer_wait_ms(stabilizingTimer, 1000)) {}
+    while (
+        !timer_wait_ms(stabilizingTimer,
+                       CALIBRATION_STABILIZING_TIME_MS)) {}
 
-    const uint32_t gettingValuesTimer = timer_update();
-    uint32_t pollTimer                = timer_update();
-    uint32_t count                    = 0;
-    float sum                         = 0;
-    while (!timer_wait_ms(gettingValuesTimer, 5000)) {
-        if (timer_wait_ms(pollTimer, 100)) {
+    const uint32_t samplingTimer = timer_update();
+    uint32_t pollTimer           = timer_update();
+    uint32_t count               = 0;
+    float sum                    = 0;
+    while (!timer_wait_ms(samplingTimer,
+                          CALIBRATION_SAMPLING_TIME_MS)) {
+        if (timer_wait_ms(pollTimer,
+                          CALIBRATION_POLL_TIME_MS)) {
             float detectedAngle;
             if (!CompassDriver_GetAngle(&detectedAngle)) {
                 return false;
@@ -174,7 +181,7 @@ static bool Write(uint8_t address, uint8_t* data,
                           I2C_MEMADD_SIZE_8BIT,
                           data,
                           size,
-                          TIMEOUT);
+                          MESSAGE_TIMEOUT_MS);
     return status == HAL_OK;
 }
 
@@ -187,6 +194,6 @@ static bool Read(uint8_t address, uint8_t* data,
                          I2C_MEMADD_SIZE_8BIT,
                          data,
                          size,
-                         TIMEOUT);
+                         MESSAGE_TIMEOUT_MS);
     return status == HAL_OK;
 }
