@@ -13,14 +13,9 @@
 #include "Services/NavigationService.h"
 
 #include "Drivers/BLE_JDY_18.h"
-#include "Drivers/HMC5883LDriver.h"
+#include "Drivers/CompassDriver.h"
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#define RAD_TO_DEGREES(x) (((x) * 180) / M_PI)
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
@@ -63,17 +58,8 @@ float GetDistanceFromBeacon(float signalStrength);
  */
 void TrilateratePosition(float distanceBeacon1,
                          float distanceBeacon2,
-                         float distanceBeacon3,
-                         float* x,
+                         float distanceBeacon3, float* x,
                          float* y);
-
-/**
- * @brief Get the Angle relative to the north as found by
- * the compass module
- *
- * @return float in degrees
- */
-float GetAngleFromNorth();
 
 /**
  * @brief Calculates the desired angle with the boat
@@ -106,15 +92,11 @@ uint8_t GetPowerPercentage(float detected, float desired);
  */
 float GetRudderAngle(float detected, float desired);
 
-static calibration_offset_t HMC_offset;
-
 void NavigationService_Init() {
     PowerControlDriver_Init();
-    HAL_Delay(1000);
+    HAL_Delay(200);
     // RudderControlDriver_Init();
-    HMC5883LDriver_Init();
-
-    // HMC_offset = HMC5883LDriver_Calibration();
+    CompassDriver_Init();
 }
 
 void NavigationService_Handler() {
@@ -133,14 +115,19 @@ void NavigationService_Handler() {
 
     // float desiredAngle =
     //     GetDesiredAngle(currentX, currentY);
-    float detectedAngle = GetAngleFromNorth();
-    angleDebug          = detectedAngle;
+
+    float detectedAngle;
+    if (!CompassDriver_GetAngle(&detectedAngle)) {
+        // invalid value, so ignore this cycle
+        return;
+    }
+    angleDebug = detectedAngle;
     // PowerControlDriver_SetPower(
     //     GetPowerPercentage(detectedAngle, desiredAngle),
     //     false);
     // RudderControlDriver_SetAngle(
     //     GetRudderAngle(detectedAngle, desiredAngle));
-    HAL_Delay(1000);
+    HAL_Delay(200);
 }
 
 float GetDistanceFromBeacon(float signalStrength) {
@@ -149,8 +136,7 @@ float GetDistanceFromBeacon(float signalStrength) {
 
 void TrilateratePosition(float distanceBeacon1,
                          float distanceBeacon2,
-                         float distanceBeacon3,
-                         float* x,
+                         float distanceBeacon3, float* x,
                          float* y) {
     const float a1 = 2 * (BEACON_2_X - BEACON_1_X);
     const float b1 = 2 * (BEACON_2_Y - BEACON_1_Y);
@@ -170,24 +156,6 @@ void TrilateratePosition(float distanceBeacon1,
 
     *x = (c1 * b2 - c2 * b1) / (a1 * b2 - a2 * b1);
     *y = (a1 * c2 - a2 * c1) / (a1 * b2 - a2 * b1);
-}
-
-float GetAngleFromNorth() {
-    int16_t compassX;
-    int16_t compassY;
-    int16_t compassZ;
-    HMC5883LDriver_GetHeading(
-        &compassX, &compassY, &compassZ);
-    // actual HMC5883L value
-    compassX -= HMC_offset.x_axis;
-    compassY -= HMC_offset.y_axis;
-    compassZ -= HMC_offset.z_axis;
-
-    const float angleDegrees =
-        RAD_TO_DEGREES(atan2(compassY, compassX));
-
-    return angleDegrees < 0 ? 360 + angleDegrees
-                            : angleDegrees;
 }
 
 float GetDesiredAngle(float x, float y) {
