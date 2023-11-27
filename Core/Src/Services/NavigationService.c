@@ -16,12 +16,13 @@
 #include "Drivers/CompassDriver.h"
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
+#include "Utils.h"
 #include "timer_handler.h"
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
 #define BLE_POWER 0
-#define POWER_KP  0
+#define POWER_KP  1
 #define RUDDER_KP 1.5
 
 #define BEACON_1_X 0
@@ -126,8 +127,8 @@ void NavigationService_Handler() {
     //     &currentX,
     //     &currentY);
 
-    // float desiredAngle =
-    //     GetDesiredAngle(currentX, currentY);
+    float desiredAngle = 0;
+    // GetDesiredAngle(currentX, currentY);
 
     float detectedAngle;
     if (!CompassDriver_GetAngle(&detectedAngle)) {
@@ -135,11 +136,11 @@ void NavigationService_Handler() {
         return;
     }
     angleDebug = detectedAngle;
-    // PowerControlDriver_SetPower(
-    //     GetPowerPercentage(detectedAngle, desiredAngle),
-    //     false);
+    PowerControlDriver_SetPower(
+        GetPowerPercentage(detectedAngle, desiredAngle),
+        true);
     RudderControlDriver_SetAngle(
-        GetRudderAngle(detectedAngle, 0));
+        -GetRudderAngle(detectedAngle, desiredAngle));
 }
 
 float GetDistanceFromBeacon(float signalStrength) {
@@ -179,7 +180,12 @@ float GetDesiredAngle(float x, float y) {
 
 uint8_t GetPowerPercentage(float detected, float desired) {
     const float error = fabs(desired - detected);
-    return 100 - (POWER_KP * error);
+
+    float power = (100 - (POWER_KP * error));
+
+    UTILS_CLAMP(power, 75, 100);
+
+    return power;
 }
 float GetRudderAngle(float detected, float desired) {
     const float error = desired - detected;
