@@ -55,7 +55,8 @@ static bool CalibrateToNorth(void);
  * @return true ok
  * @return false not ok
  */
-static bool Write(uint8_t address, uint8_t* data,
+static bool Write(uint8_t address,
+                  uint8_t* data,
                   uint16_t size);
 
 /**
@@ -67,7 +68,8 @@ static bool Write(uint8_t address, uint8_t* data,
  * @return true ok
  * @return false not ok
  */
-static bool Read(uint8_t address, uint8_t* data,
+static bool Read(uint8_t address,
+                 uint8_t* data,
                  uint16_t size);
 
 static bool initDone           = false;
@@ -120,8 +122,9 @@ bool CompassDriver_GetAngle(float* angle) {
 
 bool GetHeadings(int16_t* x, int16_t* y, int16_t* z) {
     uint8_t buffer[6];
-    if (!Read(
-            DATA_START_REGISTER, buffer, sizeof(buffer))) {
+    if (!Read(DATA_START_REGISTER,
+              buffer,
+              sizeof(buffer))) {
         return false;
     }
     *x = (((int16_t)buffer[0]) << 8) | buffer[1];
@@ -143,8 +146,9 @@ static bool SetConfigurationA(void) {
 static bool SetContinousMode(void) {
     // For continous mode: bit 0 and 1 should be 00;
     uint8_t modeRegister = 0b000'0000;
-    return Write(
-        MODE_REGISTER, &modeRegister, sizeof(modeRegister));
+    return Write(MODE_REGISTER,
+                 &modeRegister,
+                 sizeof(modeRegister));
 }
 
 static bool CalibrateToNorth(void) {
@@ -179,7 +183,8 @@ static bool CalibrateToNorth(void) {
     return true;
 }
 
-static bool Write(uint8_t address, uint8_t* data,
+static bool Write(uint8_t address,
+                  uint8_t* data,
                   uint16_t size) {
     HAL_StatusTypeDef status =
         HAL_I2C_Mem_Write(&I2C_HANDLER,
@@ -192,7 +197,8 @@ static bool Write(uint8_t address, uint8_t* data,
     return status == HAL_OK;
 }
 
-static bool Read(uint8_t address, uint8_t* data,
+static bool Read(uint8_t address,
+                 uint8_t* data,
                  uint16_t size) {
     HAL_StatusTypeDef status =
         HAL_I2C_Mem_Read(&I2C_HANDLER,

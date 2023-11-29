@@ -25,12 +25,12 @@
 #define POWER_KP  1
 #define RUDDER_KP 1.5
 
-#define BEACON_1_X -19.866425 //saída x
-#define BEACON_1_Y -43.964556 //saída y
-#define BEACON_2_X -19.866733  //chegada x
-#define BEACON_2_Y -43.964666 //chegada y
-#define BEACON_3_X -19.866581 //beacon x
-#define BEACON_3_Y -43.964787 //beacon y
+#define BEACON_1_X -19.866425 // saída x
+#define BEACON_1_Y -43.964556 // saída y
+#define BEACON_2_X -19.866733 // chegada x
+#define BEACON_2_Y -43.964666 // chegada y
+#define BEACON_3_X -19.866581 // beacon x
+#define BEACON_3_Y -43.964787 // beacon y
 
 #define TARGET_BEACON_X BEACON_1_X
 #define TARGET_BEACON_Y BEACON_1_Y
@@ -60,7 +60,8 @@ float GetDistanceFromBeacon(float signalStrength);
  */
 void TrilateratePosition(float distanceBeacon1,
                          float distanceBeacon2,
-                         float distanceBeacon3, float* x,
+                         float distanceBeacon3,
+                         float* x,
                          float* y);
 
 /**
@@ -97,12 +98,13 @@ float GetRudderAngle(float detected, float desired);
 void NavigationService_Init() {
     PowerControlDriver_Init();
     RudderControlDriver_Init();
+    BeaconPosition_Init();
 
     // Small delay to allow sensors power up
     HAL_Delay(10);
-    while (!CompassDriver_Init(true)) {
-        // try to init until it is successful
-    }
+    // while (!CompassDriver_Init(true)) {
+    // try to init until it is successful
+    // }
 }
 
 void NavigationService_Handler() {
@@ -114,8 +116,8 @@ void NavigationService_Handler() {
     }
     timer = timer_update();
 
-    // SlaveDevice_t slaves[3];
-    // BLE_scan_slaves_and_save(slaves, 3);
+    SlaveDevice_t slaves[3];
+    BLE_scan_slaves_and_save(slaves, 3);
 
     // float currentX;
     // float currentY;
@@ -127,20 +129,20 @@ void NavigationService_Handler() {
     //     &currentX,
     //     &currentY);
 
-    float desiredAngle = 0;
+    // float desiredAngle = 0;
     // GetDesiredAngle(currentX, currentY);
 
-    float detectedAngle;
-    if (!CompassDriver_GetAngle(&detectedAngle)) {
-        // invalid value, so ignore this cycle
-        return;
-    }
-    angleDebug = detectedAngle;
-    PowerControlDriver_SetPower(
-        GetPowerPercentage(detectedAngle, desiredAngle),
-        true);
-    RudderControlDriver_SetAngle(
-        -GetRudderAngle(detectedAngle, desiredAngle));
+    // float detectedAngle;
+    // if (!CompassDriver_GetAngle(&detectedAngle)) {
+    //     // invalid value, so ignore this cycle
+    //     return;
+    // }
+    // angleDebug = detectedAngle;
+    // PowerControlDriver_SetPower(
+    //     GetPowerPercentage(detectedAngle, desiredAngle),
+    //     true);
+    // RudderControlDriver_SetAngle(
+    //     -GetRudderAngle(detectedAngle, desiredAngle));
 }
 
 float GetDistanceFromBeacon(float signalStrength) {
@@ -149,7 +151,8 @@ float GetDistanceFromBeacon(float signalStrength) {
 
 void TrilateratePosition(float distanceBeacon1,
                          float distanceBeacon2,
-                         float distanceBeacon3, float* x,
+                         float distanceBeacon3,
+                         float* x,
                          float* y) {
     const float a1 = 2 * (BEACON_2_X - BEACON_1_X);
     const float b1 = 2 * (BEACON_2_Y - BEACON_1_Y);

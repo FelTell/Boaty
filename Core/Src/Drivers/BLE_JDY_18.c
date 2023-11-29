@@ -18,13 +18,13 @@ const char* at_commands[] = {
 
 // Função para configurar o JDY-18 com configurações
 // iniciais
-void BLE_setup(UART_HandleTypeDef* huartInt,
-               SlaveDevice_t* slave_list,
-               char* nome,
-               Funcao_t funcao,
-               Baudrate_t baud,
-               char* uuid,
-               int power_pctg) {
+void BeaconPosition_Init(UART_HandleTypeDef* huartInt,
+                         SlaveDevice_t* slave_list,
+                         char* nome,
+                         Funcao_t funcao,
+                         Baudrate_t baud,
+                         char* uuid,
+                         int power_pctg) {
     huart            = huartInt;
     slave_list->topo = 0;
 
@@ -80,8 +80,9 @@ void BLE_scan_slaves_and_save(SlaveDevice_t* slave_list,
     }
     // Encontrou um pacote válido
     char mac_address[18];
-    strncpy(
-        mac_address, mac_ptr + 4, 17); // Copia o número MAC
+    strncpy(mac_address,
+            mac_ptr + 4,
+            17);            // Copia o número MAC
     mac_address[17] = '\0'; // Adiciona caractere nulo
     if (is_MAC_in_list(slave_list, mac_address) == false) {
         strcpy(slave_list[slave_list->topo].mac_address,
