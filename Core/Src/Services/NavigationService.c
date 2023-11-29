@@ -36,6 +36,8 @@
 #define TARGET_BEACON_Y BEACON_1_Y
 
 volatile float angleDebug;
+volatile float xDebug;
+volatile float yDebug;
 
 /**
  * @brief Calculates the distance (radius) with the signal
@@ -130,6 +132,7 @@ void NavigationService_Handler() {
     float beaconDistances[BEACONS_NUMBER];
     float currentX;
     float currentY;
+
     if (!BeaconDistance_GetDistances(beaconDistances)) {
         // invalid value, so ignore this cycle
         return;
@@ -141,14 +144,17 @@ void NavigationService_Handler() {
                         &currentX,
                         &currentY);
 
+    xDebug = currentX;
+    yDebug = currentY;
+
     // float desiredAngle = 0;
     // GetDesiredAngle(currentX, currentY);
 
     // PowerControlDriver_SetPower(
-    //     GetPowerPercentage(detectedAngle, desiredAngle),
+    //     GetPowerPercentage(detectedAngle, 0),
     //     true);
     // RudderControlDriver_SetAngle(
-    //     -GetRudderAngle(detectedAngle, desiredAngle));
+    //     -GetRudderAngle(detectedAngle, 0));
 }
 
 void TrilateratePosition(float distanceBeacon1,
