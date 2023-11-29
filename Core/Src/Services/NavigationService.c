@@ -98,10 +98,13 @@ float GetRudderAngle(float detected, float desired);
 void NavigationService_Init() {
     PowerControlDriver_Init();
     RudderControlDriver_Init();
-    BeaconPosition_Init();
 
     // Small delay to allow sensors power up
     HAL_Delay(10);
+    while (1) {
+        BeaconPosition_Init();
+        HAL_Delay(100);
+    }
     // while (!CompassDriver_Init(true)) {
     // try to init until it is successful
     // }
@@ -117,7 +120,7 @@ void NavigationService_Handler() {
     timer = timer_update();
 
     SlaveDevice_t slaves[3];
-    BLE_scan_slaves_and_save(slaves, 3);
+    // BLE_scan_slaves_and_save(slaves, 3);
 
     // float currentX;
     // float currentY;
