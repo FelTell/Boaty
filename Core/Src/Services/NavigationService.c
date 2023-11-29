@@ -16,8 +16,9 @@
 #include "Drivers/CompassDriver.h"
 #include "Drivers/PowerControlDriver.h"
 #include "Drivers/RudderControlDriver.h"
+#include "TimerHandler.h"
 #include "Utils.h"
-#include "timer_handler.h"
+#include "main.h"
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
@@ -101,26 +102,25 @@ void NavigationService_Init() {
 
     // Small delay to allow sensors power up
     HAL_Delay(10);
-    while (1) {
-        BeaconPosition_Init();
-        HAL_Delay(100);
-    }
+
+    BeaconDistance_Init();
     // while (!CompassDriver_Init(true)) {
     // try to init until it is successful
     // }
 }
 
 void NavigationService_Handler() {
-    static uint32_t timer;
+    static uint32_t calculatePositiontimer;
+
+    BeaconDistance_Handler();
 
     // Run this function periodically
-    if (!timer_wait_ms(timer, 100)) {
+    if (!Timer_WaitMs(calculatePositiontimer, 1000)) {
         return;
     }
-    timer = timer_update();
+    calculatePositiontimer = Timer_Update();
 
-    SlaveDevice_t slaves[3];
-    // BLE_scan_slaves_and_save(slaves, 3);
+    // BLE_scan_slaves_and_save(3);
 
     // float currentX;
     // float currentY;

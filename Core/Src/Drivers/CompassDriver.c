@@ -1,7 +1,7 @@
 #include "Drivers/CompassDriver.h"
 
 #include "stm32f4xx_hal.h"
-#include "timer_handler.h"
+#include "TimerHandler.h"
 
 extern I2C_HandleTypeDef hi2c1;
 #define I2C_HANDLER hi2c1
@@ -154,18 +154,18 @@ static bool SetContinousMode(void) {
 static bool CalibrateToNorth(void) {
     calibrationFactor = 0;
 
-    const uint32_t stabilizingTimer = timer_update();
+    const uint32_t stabilizingTimer = Timer_Update();
     while (
-        !timer_wait_ms(stabilizingTimer,
+        !Timer_WaitMs(stabilizingTimer,
                        CALIBRATION_STABILIZING_TIME_MS)) {}
 
-    const uint32_t samplingTimer = timer_update();
-    uint32_t pollTimer           = timer_update();
+    const uint32_t samplingTimer = Timer_Update();
+    uint32_t pollTimer           = Timer_Update();
     uint32_t count               = 0;
     float sum                    = 0;
-    while (!timer_wait_ms(samplingTimer,
+    while (!Timer_WaitMs(samplingTimer,
                           CALIBRATION_SAMPLING_TIME_MS)) {
-        if (timer_wait_ms(pollTimer,
+        if (Timer_WaitMs(pollTimer,
                           CALIBRATION_POLL_TIME_MS)) {
             float detectedAngle;
             if (!CompassDriver_GetAngle(&detectedAngle)) {
@@ -173,7 +173,7 @@ static bool CalibrateToNorth(void) {
             }
             count++;
             sum += detectedAngle;
-            pollTimer = timer_update();
+            pollTimer = Timer_Update();
         }
     }
 

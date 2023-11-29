@@ -1,7 +1,7 @@
 /**
- * @file timer_handler.h
- * @author Felipe Telles (felipe.telles@42we.tech)
- * @brief timer handler to allow a simple scaler
+ * @file TimerHandler.h
+ * @author Felipe Telles (felipe.melo.telles@gmail.com)
+ * @brief Timer handler to allow a simple scheduler
  * @date 27-11-2023
  *
  *
@@ -24,10 +24,10 @@
  * @return true The desired time has elapsed.
  * @return false The desired time has not been elapsed.
  */
-bool timer_wait_ms(uint32_t timer_start, uint32_t delay);
+bool Timer_WaitMs(uint32_t timer_start, uint32_t delay);
 /**
  * @brief Update timer to current tick value.
  *
  * @return current time value
  */
-uint32_t timer_update(void);
+uint32_t Timer_Update(void);
