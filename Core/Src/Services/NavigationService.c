@@ -101,7 +101,7 @@ void NavigationService_Init() {
     RudderControlDriver_Init();
 
     // Small delay to allow sensors power up
-    HAL_Delay(10);
+    HAL_Delay(100);
 
     BeaconDistance_Init();
     // while (!CompassDriver_Init(true)) {

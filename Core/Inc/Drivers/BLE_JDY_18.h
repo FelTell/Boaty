@@ -5,3 +5,4 @@
 
 bool BeaconDistance_Init();
 bool BeaconDistance_Handler();
+void BeaconDistance_IdleCallback();
