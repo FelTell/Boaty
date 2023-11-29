@@ -50,6 +50,7 @@ static bool SendCommand(const char* command,
 static void StoreIfBeacon(Slave_t* slave);
 static float GetDistanceFromRssi(float signalStrength,
                                  uint8_t beaconIndex);
+static void StartDma(void);
 
 static uint8_t rxDmaBuffer[DMA_BUFFER_SIZE];
 static uint8_t rxBuffer[MESSAGE_MAX_SIZE];
@@ -83,10 +84,7 @@ bool BeaconDistance_Init(void) {
     if (!SendCommand(COMMAND_SET_ROLE, MODE_SET_MASTER)) {
         return false;
     }
-    HAL_UART_Receive_DMA(&UART_HANDLER,
-                         rxDmaBuffer,
-                         sizeof(rxDmaBuffer));
-    __HAL_UART_ENABLE_IT(&UART_HANDLER, UART_IT_IDLE);
+    StartDma();
 
     currentCounter = 0;
     lastCounter    = 0;
@@ -192,6 +190,13 @@ static float GetDistanceFromRssi(float signalStrength,
             (2 * 10));
 }
 
+static void StartDma(void) {
+    HAL_UART_Receive_DMA(&UART_HANDLER,
+                         rxDmaBuffer,
+                         sizeof(rxDmaBuffer));
+    __HAL_UART_ENABLE_IT(&UART_HANDLER, UART_IT_IDLE);
+}
+
 void BeaconDistance_ErrorCallback(void) {
     HAL_UART_DMAStop(&UART_HANDLER);
     HAL_UART_Abort(&UART_HANDLER);
@@ -201,13 +206,9 @@ void BeaconDistance_ErrorCallback(void) {
     lastCounter    = 0;
 
     MX_USART3_UART_Init();
-
     UART_HANDLER.Init.BaudRate = 115200;
     HAL_UART_Init(&UART_HANDLER);
-    HAL_UART_Receive_DMA(&UART_HANDLER,
-                         rxDmaBuffer,
-                         sizeof(rxDmaBuffer));
-    __HAL_UART_ENABLE_IT(&UART_HANDLER, UART_IT_IDLE);
+    StartDma();
 }
 
 void BeaconDistance_IdleCallback(void) {
@@ -224,10 +225,4 @@ void BeaconDistance_IdleCallback(void) {
     }
 
     rxBytesLeftToRead = i;
-}
-
-void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart) {
-    if (huart == &UART_HANDLER) {
-        BeaconDistance_ErrorCallback();
-    }
 }

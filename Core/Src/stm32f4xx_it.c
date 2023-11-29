@@ -261,5 +261,9 @@ void EXTI15_10_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart) {
+    if (huart == &huart3) {
+        BeaconDistance_ErrorCallback();
+    }
+}
 /* USER CODE END 1 */

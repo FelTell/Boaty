@@ -7,6 +7,7 @@
 
 bool BeaconDistance_Init(void);
 bool BeaconDistance_Handler(void);
-void BeaconDistance_IdleCallback(void);
 bool BeaconDistance_GetDistances(
     float pDistances[BEACONS_NUMBER]);
+void BeaconDistance_ErrorCallback(void);
+void BeaconDistance_IdleCallback(void);
