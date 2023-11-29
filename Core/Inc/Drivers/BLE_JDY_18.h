@@ -3,6 +3,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-bool BeaconDistance_Init();
-bool BeaconDistance_Handler();
-void BeaconDistance_IdleCallback();
+#define BEACONS_NUMBER 3
+
+bool BeaconDistance_Init(void);
+bool BeaconDistance_Handler(void);
+void BeaconDistance_IdleCallback(void);
+bool BeaconDistance_GetDistances(
+    float pDistances[BEACONS_NUMBER]);

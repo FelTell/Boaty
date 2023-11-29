@@ -6,14 +6,10 @@
 #include <string.h>
 
 #include "TimerHandler.h"
-#include "main.h"
+#include "usart.h"
 
-extern UART_HandleTypeDef huart3;
 #define UART_HANDLER huart3
-extern DMA_HandleTypeDef hdma_usart3_rx;
-#define DMA_HANDLER hdma_usart3_rx
-
-#define BEACONS_NUMBER 3
+#define DMA_HANDLER  hdma_usart3_rx
 
 #define MESSAGE_TIMEOUT_MS 10
 #define DMA_BUFFER_SIZE    256
@@ -39,44 +35,47 @@ extern DMA_HandleTypeDef hdma_usart3_rx;
 #define BEACON2_MAC "CA92A80D8132"
 #define BEACON3_MAC "E2BB9E4F2A04"
 
+#define BEACON1_POWER (-69)
+#define BEACON2_POWER (-69)
+#define BEACON3_POWER (-69)
+
 typedef struct {
     char Mac[MAC_SIZE];
     int32_t Rssi;
 } Slave_t;
 
-struct {
-    Slave_t pSlave;
-    float distanceCm;
-} beacons[BEACONS_NUMBER];
-
-static bool RequestScan();
+static bool RequestScan(void);
 static bool SendCommand(const char* command,
                         const char* parameter);
 static void StoreIfBeacon(Slave_t* slave);
+static float GetDistanceFromRssi(float signalStrength,
+                                 uint8_t beaconIndex);
 
 static uint8_t rxDmaBuffer[DMA_BUFFER_SIZE];
 static uint8_t rxBuffer[MESSAGE_MAX_SIZE];
 
-static char beaconsMAC[BEACONS_NUMBER][MAC_SIZE] = {
+static const char beaconsMAC[BEACONS_NUMBER][MAC_SIZE] = {
     BEACON1_MAC,
     BEACON2_MAC,
     BEACON3_MAC};
-static float distances[BEACONS_NUMBER];
+static const float beaconsPower[BEACONS_NUMBER] = {
+    BEACON1_POWER,
+    BEACON2_POWER,
+    BEACON3_POWER};
+
+static float distances[BEACONS_NUMBER] = {-1, -1, -1};
+static Slave_t beacons[BEACONS_NUMBER];
 
 static volatile uint8_t rxBytesLeftToRead = 0;
 static volatile bool dataReady            = false;
+static volatile uint8_t currentCounter    = 0;
+static volatile uint8_t lastCounter       = 0;
 
-bool BeaconDistance_Init() {
-    HAL_UART_Receive_DMA(&UART_HANDLER,
-                         rxDmaBuffer,
-                         sizeof(rxDmaBuffer));
-    __HAL_UART_ENABLE_IT(&UART_HANDLER, UART_IT_IDLE);
-
+bool BeaconDistance_Init(void) {
     // Increase baudrate as default is too low (9600)
     if (!SendCommand(COMMAND_SET_BAUD, BAUD_SET_115200)) {
         return false;
     }
-    HAL_Delay(10);
     UART_HANDLER.Init.BaudRate = 115200;
     if (HAL_UART_Init(&UART_HANDLER) != HAL_OK) {
         return false;
@@ -84,11 +83,18 @@ bool BeaconDistance_Init() {
     if (!SendCommand(COMMAND_SET_ROLE, MODE_SET_MASTER)) {
         return false;
     }
+    HAL_UART_Receive_DMA(&UART_HANDLER,
+                         rxDmaBuffer,
+                         sizeof(rxDmaBuffer));
+    __HAL_UART_ENABLE_IT(&UART_HANDLER, UART_IT_IDLE);
+
+    currentCounter = 0;
+    lastCounter    = 0;
 
     return true;
 }
 
-bool BeaconDistance_Handler() {
+bool BeaconDistance_Handler(void) {
     static uint32_t scanBeacontimer;
 
     if (Timer_WaitMs(scanBeacontimer, 200)) {
@@ -124,7 +130,19 @@ bool BeaconDistance_Handler() {
     return true;
 }
 
-static bool RequestScan() {
+bool BeaconDistance_GetDistances(
+    float pDistances[BEACONS_NUMBER]) {
+    for (uint8_t i = 0; i < BEACONS_NUMBER; ++i) {
+        if (distances[i] < 0) {
+            return false;
+        }
+    }
+    memcpy(pDistances, distances, sizeof(distances));
+
+    return 1;
+}
+
+static bool RequestScan(void) {
     if (!SendCommand(COMMAND_SCAN, "")) {
         return false;
     }
@@ -156,23 +174,43 @@ static void StoreIfBeacon(Slave_t* slave) {
         if (memcmp(slave->Mac, beaconsMAC[i], MAC_SIZE) ==
             0) {
             distances[i] =
-                pow(10.f, (-69 - slave->Rssi) / 20.f);
-
-            beacons[i].pSlave = *slave;
-            beacons[i].distanceCm =
-                (float)((pow(10.f,
-                             (float)((-69 - slave->Rssi) /
-                                     20.f))) *
-                        10.f);
+                GetDistanceFromRssi(slave->Rssi, i);
+            beacons[i] = *slave;
             return;
         }
     }
 }
 
-void BeaconDistance_IdleCallback() {
-    static volatile uint8_t currentCounter;
-    static volatile uint8_t lastCounter;
+static float GetDistanceFromRssi(float signalStrength,
+                                 uint8_t beaconIndex) {
+    if (!(beaconIndex < BEACONS_NUMBER)) {
+        return -1;
+    }
+    return pow(
+        10,
+        (beaconsPower[beaconIndex] - signalStrength) /
+            (2 * 10));
+}
 
+void BeaconDistance_ErrorCallback(void) {
+    HAL_UART_DMAStop(&UART_HANDLER);
+    HAL_UART_Abort(&UART_HANDLER);
+    HAL_UART_DeInit(&UART_HANDLER);
+
+    currentCounter = 0;
+    lastCounter    = 0;
+
+    MX_USART3_UART_Init();
+
+    UART_HANDLER.Init.BaudRate = 115200;
+    HAL_UART_Init(&UART_HANDLER);
+    HAL_UART_Receive_DMA(&UART_HANDLER,
+                         rxDmaBuffer,
+                         sizeof(rxDmaBuffer));
+    __HAL_UART_ENABLE_IT(&UART_HANDLER, UART_IT_IDLE);
+}
+
+void BeaconDistance_IdleCallback(void) {
     currentCounter = (DMA_BUFFER_SIZE -
                       __HAL_DMA_GET_COUNTER(&DMA_HANDLER));
 
@@ -186,4 +224,10 @@ void BeaconDistance_IdleCallback() {
     }
 
     rxBytesLeftToRead = i;
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart) {
+    if (huart == &UART_HANDLER) {
+        BeaconDistance_ErrorCallback();
+    }
 }

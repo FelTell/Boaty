@@ -22,7 +22,6 @@
 
 // TODO (Felipe): Estimate and define this values when the
 // boat is ready and in our hands
-#define BLE_POWER 0
 #define POWER_KP  1
 #define RUDDER_KP 1.5
 
@@ -101,12 +100,14 @@ void NavigationService_Init() {
     RudderControlDriver_Init();
 
     // Small delay to allow sensors power up
-    HAL_Delay(100);
+    HAL_Delay(10);
 
-    BeaconDistance_Init();
-    // while (!CompassDriver_Init(true)) {
-    // try to init until it is successful
-    // }
+    while (!BeaconDistance_Init()) {
+        // try to init until it is successful
+    }
+    while (!CompassDriver_Init(true)) {
+        // try to init until it is successful
+    }
 }
 
 void NavigationService_Handler() {
@@ -120,36 +121,34 @@ void NavigationService_Handler() {
     }
     calculatePositiontimer = Timer_Update();
 
-    // BLE_scan_slaves_and_save(3);
+    float detectedAngle;
+    if (!CompassDriver_GetAngle(&detectedAngle)) {
+        return;
+    }
+    angleDebug = detectedAngle;
 
-    // float currentX;
-    // float currentY;
+    float beaconDistances[BEACONS_NUMBER];
+    float currentX;
+    float currentY;
+    if (!BeaconDistance_GetDistances(beaconDistances)) {
+        // invalid value, so ignore this cycle
+        return;
+    }
 
-    // TrilateratePosition(
-    //     GetDistanceFromBeacon(slaves[1].signal_rssi),
-    //     GetDistanceFromBeacon(slaves[2].signal_rssi),
-    //     GetDistanceFromBeacon(slaves[3].signal_rssi),
-    //     &currentX,
-    //     &currentY);
+    TrilateratePosition(beaconDistances[0],
+                        beaconDistances[1],
+                        beaconDistances[2],
+                        &currentX,
+                        &currentY);
 
     // float desiredAngle = 0;
     // GetDesiredAngle(currentX, currentY);
 
-    // float detectedAngle;
-    // if (!CompassDriver_GetAngle(&detectedAngle)) {
-    //     // invalid value, so ignore this cycle
-    //     return;
-    // }
-    // angleDebug = detectedAngle;
     // PowerControlDriver_SetPower(
     //     GetPowerPercentage(detectedAngle, desiredAngle),
     //     true);
     // RudderControlDriver_SetAngle(
     //     -GetRudderAngle(detectedAngle, desiredAngle));
-}
-
-float GetDistanceFromBeacon(float signalStrength) {
-    return pow(10, (BLE_POWER - signalStrength) / (2 * 10));
 }
 
 void TrilateratePosition(float distanceBeacon1,
