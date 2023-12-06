@@ -137,7 +137,7 @@ bool GetHeadings(int16_t* x, int16_t* y, int16_t* z) {
 static bool SetConfigurationA(void) {
     // Set output as 15 Hz and set the numbers of samples
     // averaged to 8
-    uint8_t configurationA = 0b0111'0000;
+    uint8_t configurationA = 0b01110000;
     return Write(CONFIGURATION_A_REGISTER,
                  &configurationA,
                  sizeof(configurationA));
@@ -145,7 +145,7 @@ static bool SetConfigurationA(void) {
 
 static bool SetContinousMode(void) {
     // For continous mode: bit 0 and 1 should be 00;
-    uint8_t modeRegister = 0b000'0000;
+    uint8_t modeRegister = 0b0000000;
     return Write(MODE_REGISTER,
                  &modeRegister,
                  sizeof(modeRegister));

@@ -36,8 +36,8 @@
 #define BEACON3_MAC "3CA551936A41"
 
 #define BEACON1_POWER (-69)
-#define BEACON2_POWER (-69)
-#define BEACON3_POWER (-69)
+#define BEACON2_POWER (-58)
+#define BEACON3_POWER (-68)
 
 typedef struct {
     char Mac[MAC_SIZE];

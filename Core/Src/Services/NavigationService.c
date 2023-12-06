@@ -133,28 +133,26 @@ void NavigationService_Handler() {
     float currentX;
     float currentY;
 
-    if (!BeaconDistance_GetDistances(beaconDistances)) {
-        // invalid value, so ignore this cycle
-        return;
-    }
+    // if (!BeaconDistance_GetDistances(beaconDistances)) {
+    //     // invalid value, so ignore this cycle
+    //     return;
+    // }
 
-    TrilateratePosition(beaconDistances[0],
-                        beaconDistances[1],
-                        beaconDistances[2],
-                        &currentX,
-                        &currentY);
+    // TrilateratePosition(beaconDistances[0],
+    //                     beaconDistances[1],
+    //                     beaconDistances[2],
+    //                     &currentX,
+    //                     &currentY);
 
-    xDebug = currentX;
-    yDebug = currentY;
+    // xDebug = currentX;
+    // yDebug = currentY;
 
     // float desiredAngle = 0;
     // GetDesiredAngle(currentX, currentY);
 
-    // PowerControlDriver_SetPower(
-    //     GetPowerPercentage(detectedAngle, 0),
-    //     true);
-    // RudderControlDriver_SetAngle(
-    //     -GetRudderAngle(detectedAngle, 0));
+    PowerControlDriver_SetPower(100, true);
+    RudderControlDriver_SetAngle(
+        -GetRudderAngle(detectedAngle, 0));
 }
 
 void TrilateratePosition(float distanceBeacon1,
