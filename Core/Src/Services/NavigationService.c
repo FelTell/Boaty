@@ -20,11 +20,11 @@
 #include "Utils.h"
 #include "main.h"
 
-// TODO (Felipe): Estimate and define this values when the
-// boat is ready and in our hands
-#define POWER_KP  1
 #define RUDDER_KP 1.5
 
+// Position in coordinates, needs to be changed to another
+// unit, preferably meters from start to match units
+// calculated with the beacon rssi
 #define BEACON_1_X -19.866425 // saída x
 #define BEACON_1_Y -43.964556 // saída y
 #define BEACON_2_X -19.866733 // chegada x
@@ -35,9 +35,7 @@
 #define TARGET_BEACON_X BEACON_1_X
 #define TARGET_BEACON_Y BEACON_1_Y
 
-volatile float angleDebug;
-volatile float xDebug;
-volatile float yDebug;
+static uint32_t firstTimer;
 
 /**
  * @brief Calculates the distance (radius) with the signal
@@ -77,17 +75,6 @@ void TrilateratePosition(float distanceBeacon1,
 float GetDesiredAngle(float x, float y);
 
 /**
- * @brief Calculates the right power to send to the motor as
- * defined by the error of the angle. A smaller angle means
- * the motor will go full power to the target
- *
- * @param detected
- * @param desired
- * @return uint8_t
- */
-uint8_t GetPowerPercentage(float detected, float desired);
-
-/**
  * @brief Calculates the right rudder angle to reach the
  * target
  *
@@ -104,18 +91,23 @@ void NavigationService_Init() {
     // Small delay to allow sensors power up
     HAL_Delay(10);
 
-    while (!BeaconDistance_Init()) {
-        // try to init until it is successful
-    }
+    // while (!BeaconDistance_Init()) {
+    //     // try to init until it is successful
+    // }
+
+    // NOTE (Felipe): this will take some time to calibrate
+    // the compass. Where the boat is poiting at startup is
+    // the north (0°)
     while (!CompassDriver_Init(true)) {
         // try to init until it is successful
     }
+    firstTimer = Timer_Update();
 }
 
 void NavigationService_Handler() {
     static uint32_t calculatePositiontimer;
 
-    BeaconDistance_Handler();
+    // BeaconDistance_Handler();
 
     // Run this function periodically
     if (!Timer_WaitMs(calculatePositiontimer, 1000)) {
@@ -127,11 +119,22 @@ void NavigationService_Handler() {
     if (!CompassDriver_GetAngle(&detectedAngle)) {
         return;
     }
-    angleDebug = detectedAngle;
 
-    float beaconDistances[BEACONS_NUMBER];
-    float currentX;
-    float currentY;
+    // NOTE (Felipe): The logic to use BLE beacons to get
+    // the boat position proved to be unreliable. The
+    // communication is working perfectly and we're
+    // getting each beacon rssi values. But the rssi values
+    // translate very badly to position. We were reading a
+    // value of 5 meters for a beacon that was almost 40
+    // meters away... Some amount of calibration fine tuning
+    // and extreme filtering might allow a usable value, but
+    // we decided it wasn't worthy and decided to focus on
+    // compass navigation and a good calibration logic for
+    // it
+
+    // float beaconDistances[BEACONS_NUMBER];
+    // float currentX;
+    // float currentY;
 
     // if (!BeaconDistance_GetDistances(beaconDistances)) {
     //     // invalid value, so ignore this cycle
@@ -144,15 +147,32 @@ void NavigationService_Handler() {
     //                     &currentX,
     //                     &currentY);
 
-    // xDebug = currentX;
-    // yDebug = currentY;
-
     // float desiredAngle = 0;
     // GetDesiredAngle(currentX, currentY);
 
-    PowerControlDriver_SetPower(100, true);
-    RudderControlDriver_SetAngle(
-        -GetRudderAngle(detectedAngle, 0));
+    // NOTE (Felipe): There is basicaly three stages of the
+    // boat control
+
+    // First: The power motor is off to allow to check if
+    // compass and rudder is working as expected.
+
+    // Second: The boat turn on the power motor and the
+    // rudder will point forward
+
+    // Third: The boat will point at the direction in which
+    // it was turned on.
+    if (Timer_WaitMs(firstTimer, 25000)) {
+        PowerControlDriver_SetPower(100, true);
+        RudderControlDriver_SetAngle(
+            -GetRudderAngle(detectedAngle, 0));
+    } else if (Timer_WaitMs(firstTimer, 10000)) {
+        PowerControlDriver_SetPower(100, true);
+        RudderControlDriver_SetAngle(0);
+    } else {
+        PowerControlDriver_SetPower(0, true);
+        RudderControlDriver_SetAngle(
+            -GetRudderAngle(detectedAngle, 0));
+    }
 }
 
 void TrilateratePosition(float distanceBeacon1,
@@ -187,15 +207,6 @@ float GetDesiredAngle(float x, float y) {
     return RAD_TO_DEGREES(atan(deltaY / deltaX));
 }
 
-uint8_t GetPowerPercentage(float detected, float desired) {
-    const float error = fabs(desired - detected);
-
-    float power = (100 - (POWER_KP * error));
-
-    UTILS_CLAMP(power, 75, 100);
-
-    return power;
-}
 float GetRudderAngle(float detected, float desired) {
     const float error = desired - detected;
     return RUDDER_KP * error;
