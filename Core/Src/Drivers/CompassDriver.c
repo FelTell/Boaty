@@ -1,7 +1,7 @@
 #include "Drivers/CompassDriver.h"
 
-#include "stm32f4xx_hal.h"
 #include "TimerHandler.h"
+#include "stm32f4xx_hal.h"
 
 extern I2C_HandleTypeDef hi2c1;
 #define I2C_HANDLER hi2c1
@@ -111,7 +111,6 @@ bool CompassDriver_GetAngle(float* angle) {
     *angle = RAD_TO_DEGREES(atan2(compassY, compassX)) +
              calibrationFactor;
 
-    // FIXME (Felipe): this might be wrong
     if (*angle > 180) {
         *angle = *angle - 360;
     } else if (*angle < -180) {
@@ -155,18 +154,18 @@ static bool CalibrateToNorth(void) {
     calibrationFactor = 0;
 
     const uint32_t stabilizingTimer = Timer_Update();
-    while (
-        !Timer_WaitMs(stabilizingTimer,
-                       CALIBRATION_STABILIZING_TIME_MS)) {}
+    while (!Timer_WaitMs(stabilizingTimer,
+                         CALIBRATION_STABILIZING_TIME_MS)) {
+    }
 
     const uint32_t samplingTimer = Timer_Update();
     uint32_t pollTimer           = Timer_Update();
     uint32_t count               = 0;
     float sum                    = 0;
     while (!Timer_WaitMs(samplingTimer,
-                          CALIBRATION_SAMPLING_TIME_MS)) {
+                         CALIBRATION_SAMPLING_TIME_MS)) {
         if (Timer_WaitMs(pollTimer,
-                          CALIBRATION_POLL_TIME_MS)) {
+                         CALIBRATION_POLL_TIME_MS)) {
             float detectedAngle;
             if (!CompassDriver_GetAngle(&detectedAngle)) {
                 return false;
